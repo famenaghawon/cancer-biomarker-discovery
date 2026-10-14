@@ -1,5 +1,3 @@
-import json
-from pathlib import Path
 
 from cancer_biomarkers.config import DataConfig, MLConfig, PathConfig
 from cancer_biomarkers.pipeline import run

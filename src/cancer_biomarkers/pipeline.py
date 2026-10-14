@@ -5,9 +5,8 @@ import json
 from dataclasses import asdict
 
 import joblib
-import pandas as pd
 
-from .config import DataConfig, DEConfig, MLConfig, PATHS, PathConfig
+from .config import PATHS, DataConfig, DEConfig, MLConfig, PathConfig
 from .data import generate_dataset
 from .differential_expression import differential_expression
 from .logging_utils import get_logger
