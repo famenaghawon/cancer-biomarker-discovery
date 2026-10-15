@@ -21,7 +21,7 @@ sns.set_theme(style="whitegrid")
 def volcano_plot(
     de_df: pd.DataFrame,
     out: Path,
-    min_abs_log2fc: float = 0.8,
+    min_abs_log2fc: float = 0.6,
     alpha: float = 0.05,
 ) -> None:
     """Volcano plot with threshold lines matching the DE significance rule."""

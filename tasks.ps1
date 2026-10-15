@@ -44,7 +44,7 @@ function Invoke-Clean {
 
 function Show-Help {
     Write-Host ""
-    Write-Host "cancer_analysis task runner" -ForegroundColor Green
+    Write-Host "cancer-biomarker-discovery task runner" -ForegroundColor Green
     Write-Host ""
     Write-Host "  .\tasks.ps1 run     Run the full pipeline"
     Write-Host "  .\tasks.ps1 test    Run pytest"
