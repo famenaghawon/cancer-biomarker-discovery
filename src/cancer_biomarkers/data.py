@@ -1,13 +1,4 @@
-"""Synthetic TCGA-like expression data generation.
-
-Design goals
-------------
-* Effect size is expressed on the **log2 scale** (matches DE conventions).
-* Not trivially separable: heterogeneous effect sizes, per-gene noise,
-  per-sample library-size variation, "silent" tumors, and decoy genes.
-* Reproducible (fixed seed).
-* Known ground-truth biomarkers so downstream code can be validated.
-"""
+"""Synthetic TCGA-like expression data generation."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -23,8 +14,8 @@ logger = get_logger(__name__)
 
 @dataclass
 class SyntheticDataset:
-    expression: pd.DataFrame       # samples x genes
-    labels: pd.Series              # 0 = normal, 1 = tumor
+    expression: pd.DataFrame
+    labels: pd.Series
     clinical: pd.DataFrame
     true_biomarkers: list[str]
 
@@ -56,39 +47,41 @@ def generate_dataset(cfg: DataConfig) -> SyntheticDataset:
     true_biomarkers = [gn for gn in gene_names if not gn.startswith("Gene_")]
     idx_true = np.array([gene_names.index(b) for b in true_biomarkers])
 
-    # ---- Baseline expression on log2 scale ----
+    # Baseline expression on log2 scale
     baseline_log2 = rng.normal(loc=8.0, scale=1.0, size=g)
     per_gene_sd = rng.uniform(0.4, 1.2, size=g)
 
-    # ---- Labels ----
+    # Labels
     n_tumor = int(round(n * cfg.tumor_ratio))  # noqa: RUF046
     labels = np.array([1] * n_tumor + [0] * (n - n_tumor))
     rng.shuffle(labels)
 
-    # ---- Log2 expression matrix ----
-    noise = rng.normal(0, 1, size=(n, g)) * per_gene_sd[None, :]
+    # Log2 expression matrix
+    noise = rng.normal(0, cfg.noise_sd, size=(n, g)) * per_gene_sd[None, :]
     log2_expr = baseline_log2[None, :] + noise
 
-    # ---- Per-sample library-size and batch effects ----
-    lib = rng.normal(0, 0.20, size=(n, 1))
-    batch = rng.choice([-0.15, 0.0, 0.15], size=(n, 1))
+    # Per-sample library-size and batch effects, driven by cfg.batch_effect_sd
+    lib = rng.normal(0, cfg.batch_effect_sd * 0.8, size=(n, 1))
+    batch = rng.choice(
+        [-cfg.batch_effect_sd, 0.0, cfg.batch_effect_sd],
+        size=(n, 1),
+    )
     log2_expr = log2_expr + lib + batch
 
-    # ---- Tumor effect on TRUE biomarkers (log2 scale) ----
+    # Tumor effect on true biomarkers
     raw_effects = rng.normal(cfg.effect_size, cfg.effect_size * 0.5,
                              size=len(idx_true))
     raw_effects = np.clip(raw_effects, 0.2, cfg.effect_size * 2.5)
     flip = rng.random(len(idx_true)) < 0.25
     effects = raw_effects * np.where(flip, -1.0, 1.0)
 
-    # 20% of tumor samples are "silent" on the true-biomarker panel
     silent = (labels == 1) & (rng.random(n) < 0.20)
     tumor_mask = (labels == 1) & (~silent)
     for i, gi in enumerate(idx_true):
         log2_expr[tumor_mask, gi] += effects[i]
         log2_expr[silent, gi] += rng.normal(0, 0.15, size=int(silent.sum()))
 
-    # ---- Decoy genes with weaker label-correlated effects ----
+    # Decoy genes
     n_decoys = max(10, cfg.n_true_biomarkers)
     non_true_idx = np.array(
         [i for i in range(g) if i not in set(idx_true.tolist())]
@@ -99,21 +92,29 @@ def generate_dataset(cfg: DataConfig) -> SyntheticDataset:
         decoy_effect = rng.normal(0.0, cfg.effect_size * 0.8)
         log2_expr[labels == 1, gi] += decoy_effect
 
-    # ---- Global biological noise floor ----
-    log2_expr += rng.normal(0, 0.35, size=(n, g))
+    # Global noise floor
+    log2_expr += rng.normal(0, cfg.noise_sd * 0.5, size=(n, g))
 
-    # Back to linear "expression" units
+    # Convert to linear expression units
     expr = np.power(2.0, log2_expr)
 
     expression = pd.DataFrame(expr, columns=gene_names)
     labels_s = pd.Series(labels, name="label")
 
+    # Clinical metadata: stages only for tumors, "NA" for normals
+    stages = np.array(["NA"] * n, dtype=object)
+    tumor_idx = np.where(labels == 1)[0]
+    stages[tumor_idx] = rng.choice(
+        ["I", "II", "III", "IV"],
+        size=len(tumor_idx),
+        p=[0.25, 0.30, 0.30, 0.15],
+    )
+
     clinical = pd.DataFrame({
         "sample_id": [f"S{i:04d}" for i in range(n)],
         "label": labels,
         "age": rng.integers(35, 85, size=n),
-        "stage": rng.choice(["I", "II", "III", "IV"], size=n,
-                            p=[0.25, 0.30, 0.30, 0.15]),
+        "stage": stages,
         "batch": batch.ravel(),
     })
 

@@ -12,15 +12,15 @@ class DataConfig:
     tumor_ratio: float = 0.5
     n_true_biomarkers: int = 25
     effect_size: float = 0.5          # log2-scale mean shift for true biomarkers
-    noise_sd: float = 0.75            # kept for backward compat
-    batch_effect_sd: float = 0.25     # kept for backward compat
+    noise_sd: float = 1.0             # per-gene noise multiplier (see data.py)
+    batch_effect_sd: float = 0.25     # batch + library-size effect (see data.py)
     random_state: int = 42
 
 
 @dataclass(frozen=True)
 class DEConfig:
     alpha: float = 0.05
-    min_abs_log2fc: float = 0.8
+    min_abs_log2fc: float = 0.6       # tuned for effect_size=0.5 default
     method: str = "fdr_bh"
 
 
