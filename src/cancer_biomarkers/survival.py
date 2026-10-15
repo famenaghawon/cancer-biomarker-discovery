@@ -60,17 +60,32 @@ def cox_ph(
     expression: pd.DataFrame,
     time: pd.Series,
     event: pd.Series,
-    top_genes: list[str],
+    top_genes: list[str] | None = None,
+    survival_panel: list[str] | None = None,
 ) -> CoxResult:
-    """Fit a Cox PH model on the top-k gene expressions.
+    """Fit a Cox PH model on a set of gene expressions.
 
-    Rows with missing time or event are dropped. Collinear covariates
-    (correlation above 0.98) are removed before fitting.
+    Parameters
+    ----------
+    top_genes
+        Fallback panel (e.g. ML top-K) when ``survival_panel`` is None.
+    survival_panel
+        Explicit panel to use for the Cox fit. Takes priority over
+        ``top_genes``.
     """
+    panel = survival_panel if survival_panel is not None else top_genes
+    if not panel:
+        raise ValueError("cox_ph requires either top_genes or survival_panel")
+    # Restrict to genes actually present
+    panel = [g for g in panel if g in expression.columns]
+    if len(panel) < 2:
+        raise ValueError(f"Not enough valid covariates: {panel}")
+
     df = pd.concat(
-        [expression[top_genes], time.rename("time"), event.rename("event")],
+        [expression[panel], time.rename("time"), event.rename("event")],
         axis=1,
     )
+
     df = df.dropna(subset=["time", "event"])
     df = df[df["time"] > 0]
     if len(df) < 20:
@@ -93,7 +108,7 @@ def cox_ph(
     std = raw.std(axis=0).replace(0, 1.0)
     X_std = (raw - mean) / std
 
-    kept = _filter_collinear(X_std, top_genes)
+    kept = _filter_collinear(X_std, panel)
     dropped = sorted(set(top_genes) - set(kept))
     if dropped:
         logger.info(
@@ -106,11 +121,31 @@ def cox_ph(
             f"(kept {len(kept)} of {len(top_genes)})"
         )
 
-    X_kept = sm.add_constant(X_std[kept])
     y = df["time"].astype(float)
     cens = 1 - df["event"].astype(int)
-    model = PHReg(y, X_kept, status=cens, ties="efron")
-    fit = model.fit(method="bfgs")
+
+    fit = None
+    used = list(kept)
+    errors: list[str] = []
+    while len(used) >= 1 and fit is None:
+        X_kept = sm.add_constant(X_std[used])
+        try:
+            model = PHReg(y, X_kept, status=cens, ties="efron")
+            fit = model.fit(method="newton", maxiter=100)
+        except (ValueError, np.linalg.LinAlgError) as exc:
+            errors.append(f"{len(used)} covars: {exc}")
+            used = used[:-1]  # drop the last covariate and retry
+
+    if fit is None:
+        raise RuntimeError(
+            "Cox PH failed for every covariate subset. "
+            f"Errors: {'; '.join(errors)}"
+        )
+    if len(used) < len(kept):
+        logger.warning(
+            "Cox PH converged with a reduced panel: %s (dropped %s)",
+            used, [g for g in kept if g not in used],
+        )
 
     params = fit.params
     bse = fit.bse
@@ -135,7 +170,7 @@ def cox_ph(
 
     logger.info(
         "Cox PH: %d samples, %d events, %d covariates, concordance=%.3f",
-        len(df), int(df["event"].sum()), len(kept), concordance,
+        len(df), int(df["event"].sum()), len(used), concordance,
     )
     return CoxResult(coefficients=table, concordance=concordance)
 
