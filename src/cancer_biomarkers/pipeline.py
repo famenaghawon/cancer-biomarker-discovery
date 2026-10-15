@@ -8,13 +8,24 @@ from dataclasses import asdict
 import joblib
 
 from .config import PATHS, DataConfig, DEConfig, MLConfig, PathConfig
-from .data import generate_dataset
+from .data_source import generate_dataset, load_tcga_brca
 from .differential_expression import differential_expression
 from .logging_utils import get_logger
 from .ml import count_true_in_top_k, nested_cv_evaluate, train_and_evaluate
-from .plotting import heatmap_top_genes, roc_curve_plot, volcano_plot
+from .plotting import (
+    heatmap_top_genes,
+    kaplan_meier_plot,
+    roc_curve_plot,
+    volcano_plot,
+)
 
 logger = get_logger(__name__)
+
+
+# Genes commonly reported as prognostic in BRCA. PGR is intentionally
+# excluded: it is missing on a large fraction of TCGA-BRCA samples, which
+# destabilises the Cox Hessian even after dropna.
+_SURVIVAL_PANEL_CANDIDATES = ["ESR1", "ERBB2", "MKI67"]
 
 
 def _nested_enabled() -> bool:
@@ -26,6 +37,20 @@ def _nested_enabled() -> bool:
     return os.environ.get("CB_RUN_NESTED_CV", "").strip().lower() in {
         "1", "true", "yes", "y",
     }
+
+
+def _load_dataset(cfg: DataConfig):
+    """Dispatch to the configured data source.
+
+    Returns an object exposing ``expression``, ``labels``, ``clinical``,
+    and ``true_biomarkers``.
+    """
+    if cfg.source == "synthetic":
+        return generate_dataset(cfg)
+    if cfg.source == "tcga_brca":
+        panel = list(cfg.gene_panel) if cfg.gene_panel else None
+        return load_tcga_brca(cfg, gene_panel=panel)
+    raise ValueError(f"Unknown data source: {cfg.source!r}")
 
 
 def run(
@@ -41,7 +66,7 @@ def run(
     paths.ensure()
 
     # 1) Data
-    ds = generate_dataset(data_cfg)
+    ds = _load_dataset(data_cfg)
     ds.expression.to_parquet(paths.results_dir / "expression_full.parquet")
     ds.clinical.to_csv(paths.results_dir / "clinical_data.csv", index=False)
 
@@ -64,6 +89,47 @@ def run(
     if _nested_enabled():
         logger.info("CB_RUN_NESTED_CV set — running nested cross-validation")
         nested_results = nested_cv_evaluate(ds.expression, ds.labels, ml_cfg)
+
+    # 3d) Survival analysis — only when the cohort has time/event columns
+    survival_summary = None
+    if "time_days" in ds.clinical.columns and "event" in ds.clinical.columns:
+        from .survival import cox_ph, kaplan_meier, stratify_by_expression
+
+        # Prefer biologically-motivated prognostic genes over the ML panel,
+        # because top class-discriminating genes rarely predict survival.
+        preferred = [
+            g for g in _SURVIVAL_PANEL_CANDIDATES
+            if g in ds.expression.columns
+        ]
+        panel = preferred if len(preferred) >= 2 else ml_results["top_genes"][:3]
+        top_gene = panel[0]
+
+        try:
+            cox = cox_ph(
+                ds.expression,
+                ds.clinical["time_days"],
+                ds.clinical["event"],
+                top_genes=panel,
+            )
+            cox.coefficients.to_csv(paths.results_dir / "cox_coefficients.csv")
+            stratum = stratify_by_expression(ds.expression[top_gene])
+            curves = kaplan_meier(
+                ds.clinical["time_days"],
+                ds.clinical["event"],
+                stratify_by=stratum,
+            )
+            kaplan_meier_plot(
+                curves,
+                paths.figures_dir / "kaplan_meier.png",
+                title=f"KM by {top_gene} expression",
+            )
+            survival_summary = {
+                "concordance": cox.concordance,
+                "panel": panel,
+                "top_gene": top_gene,
+            }
+        except Exception as exc:
+            logger.warning("Survival analysis skipped: %s", exc, exc_info=True)
 
     # 4) Figures
     volcano_plot(
@@ -107,6 +173,8 @@ def run(
     }
     if nested_results is not None:
         summary["ml_nested"] = nested_results
+    if survival_summary is not None:
+        summary["survival"] = survival_summary
 
     with open(paths.results_dir / "analysis_summary.json", "w") as f:
         json.dump(summary, f, indent=2)

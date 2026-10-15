@@ -30,3 +30,7 @@ results/*.json
 results/*.pkl
 results/*.parquet
 results/figures/*.png
+
+# Real data cache (downloaded, not committed)
+data/cache/
+data/raw/
