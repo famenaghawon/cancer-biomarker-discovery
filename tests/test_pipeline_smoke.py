@@ -1,8 +1,10 @@
+"""End-to-end smoke tests for the pipeline."""
 from cancer_biomarkers.config import DataConfig, MLConfig, PathConfig
 from cancer_biomarkers.pipeline import run
 
 
 def test_pipeline_runs_end_to_end(tmp_path):
+    """Default run writes all expected outputs and a valid summary."""
     paths = PathConfig(results_dir=tmp_path, figures_dir=tmp_path / "figures")
 
     summary = run(
@@ -35,3 +37,22 @@ def test_pipeline_runs_end_to_end(tmp_path):
         for k in ("accuracy", "precision", "recall", "f1"):
             assert 0.0 <= m[k] <= 1.0, f"{name}.{k} out of range"
         assert 0.0 <= m["cv_roc_auc_mean"] <= 1.0
+
+
+def test_nested_cv_enabled_via_env(tmp_path, monkeypatch):
+    """Setting CB_RUN_NESTED_CV must add the ml_nested block to the summary."""
+    monkeypatch.setenv("CB_RUN_NESTED_CV", "1")
+    paths = PathConfig(results_dir=tmp_path, figures_dir=tmp_path / "figures")
+
+    summary = run(
+        data_cfg=DataConfig(n_samples=40, n_genes=60, n_true_biomarkers=5),
+        ml_cfg=MLConfig(test_size=0.25, n_splits=3, top_k_features=10),
+        paths=paths,
+    )
+
+    assert "ml_nested" in summary
+    assert "models" in summary["ml_nested"]
+    for metrics in summary["ml_nested"]["models"].values():
+        assert "roc_auc_mean" in metrics
+        assert "roc_auc_std" in metrics
+        assert 0.0 <= metrics["roc_auc_mean"] <= 1.0
