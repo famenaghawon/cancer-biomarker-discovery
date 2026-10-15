@@ -107,3 +107,22 @@ def roc_curve_plot(
     plt.savefig(out, dpi=150)
     plt.close()
     logger.info("Saved %s", out)
+
+def kaplan_meier_plot(
+    curves: list,
+    out: Path,
+    title: str = "Kaplan-Meier survival",
+) -> None:
+    """Plot a list of KMCurve objects on one axis."""
+    plt.figure(figsize=(8, 6))
+    for c in curves:
+        plt.step(c.times, c.survival, where="post", label=c.label)
+    plt.xlabel("Days")
+    plt.ylabel("Survival probability")
+    plt.title(title)
+    plt.ylim(0, 1.02)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(out, dpi=150)
+    plt.close()
+    logger.info("Saved %s", out)
