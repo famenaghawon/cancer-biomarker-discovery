@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import asdict
 
 import joblib
@@ -10,10 +11,21 @@ from .config import PATHS, DataConfig, DEConfig, MLConfig, PathConfig
 from .data import generate_dataset
 from .differential_expression import differential_expression
 from .logging_utils import get_logger
-from .ml import count_true_in_top_k, train_and_evaluate
+from .ml import count_true_in_top_k, nested_cv_evaluate, train_and_evaluate
 from .plotting import heatmap_top_genes, roc_curve_plot, volcano_plot
 
 logger = get_logger(__name__)
+
+
+def _nested_enabled() -> bool:
+    """Nested CV is opt-in to keep the default smoke path fast.
+
+    Enable by setting the ``CB_RUN_NESTED_CV`` environment variable to
+    ``1``, ``true``, or ``yes`` before running the pipeline.
+    """
+    return os.environ.get("CB_RUN_NESTED_CV", "").strip().lower() in {
+        "1", "true", "yes", "y",
+    }
 
 
 def run(
@@ -39,14 +51,19 @@ def run(
     de_df[de_df["significant"]].to_csv(
         paths.results_dir / "significant_biomarkers.csv", index=False)
 
-    # 3) ML (fast path)
-    ml_results = train_and_evaluate(ds.expression, ds.labels, ml_cfg)
-
-    from .ml import nested_cv_evaluate
-    nested_results = nested_cv_evaluate(ds.expression, ds.labels, ml_cfg)
+    # 3) ML (fast path) — ask for test probabilities so ROC plotting can reuse them
+    ml_results = train_and_evaluate(
+        ds.expression, ds.labels, ml_cfg, return_test_predictions=True,
+    )
 
     # 3b) Recovery stats for top-k
     recovery = count_true_in_top_k(ml_results["top_genes"], ds.true_biomarkers)
+
+    # 3c) Optional: nested CV (opt-in via CB_RUN_NESTED_CV=1)
+    nested_results = None
+    if _nested_enabled():
+        logger.info("CB_RUN_NESTED_CV set — running nested cross-validation")
+        nested_results = nested_cv_evaluate(ds.expression, ds.labels, ml_cfg)
 
     # 4) Figures
     volcano_plot(
@@ -55,26 +72,24 @@ def run(
         min_abs_log2fc=de_cfg.min_abs_log2fc,
         alpha=de_cfg.alpha,
     )
-    top = ml_results["top_genes"][:25]
-    heatmap_top_genes(ds.expression, ds.labels, top, paths.figures_dir / "heatmap.png")
 
-    # ROC curve for the best-performing model on the held-out test set
-    # (regenerate a small fit here so we have the test-set probabilities)
-    from sklearn.model_selection import train_test_split
-    X_tr, X_te, y_tr, y_te = train_test_split(
-        ds.expression, ds.labels,
-        test_size=ml_cfg.test_size,
-        stratify=ds.labels,
-        random_state=ml_cfg.random_state,
+    top = ml_results["top_genes"][:25]
+    heatmap_top_genes(
+        ds.expression, ds.labels, top, paths.figures_dir / "heatmap.png",
     )
-    from .ml import _make_models, _select_top_k
-    genes = _select_top_k(X_tr, y_tr, ml_cfg.top_k_features, ml_cfg.random_state)
-    best = _make_models(ml_cfg)["logistic_regression"]
-    best.fit(X_tr[genes], y_tr)
-    y_proba = best.predict_proba(X_te[genes])[:, 1]
-    roc_curve_plot(y_te.values, y_proba,
-                   paths.figures_dir / "roc_curve.png",
-                   label="logistic_regression")
+
+    # ROC curve for the best-performing model on the held-out test set.
+    # Predictions come straight from train_and_evaluate — no re-fitting.
+    best_name = max(
+        ml_results["models"],
+        key=lambda n: ml_results["models"][n]["roc_auc"] or 0.0,
+    )
+    preds = ml_results["test_predictions"][best_name]
+    roc_curve_plot(
+        preds["y_true"], preds["y_proba"],
+        paths.figures_dir / "roc_curve.png",
+        label=best_name,
+    )
 
     # 5) Persist everything
     summary = {
@@ -88,9 +103,11 @@ def run(
         "true_biomarkers_recovered": sorted(
             set(ds.true_biomarkers) & set(de_df.loc[de_df["significant"], "gene"])),
         "top_k_recovery": recovery,
-        "ml": ml_results,
-        "ml_nested": nested_results,
+        "ml": {k: v for k, v in ml_results.items() if k != "test_predictions"},
     }
+    if nested_results is not None:
+        summary["ml_nested"] = nested_results
+
     with open(paths.results_dir / "analysis_summary.json", "w") as f:
         json.dump(summary, f, indent=2)
 
@@ -101,5 +118,6 @@ def run(
         recovery["k"], recovery["n_true_in_top_k"],
         len(ds.true_biomarkers), ", ".join(recovery["true_hits"]) or "(none)",
     )
+    logger.info("Best model for ROC: %s", best_name)
     logger.info("✅ Pipeline complete. Results in %s", paths.results_dir)
     return summary

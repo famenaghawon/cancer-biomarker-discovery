@@ -124,23 +124,23 @@ def train_and_evaluate(
     expression: pd.DataFrame,
     labels: pd.Series,
     cfg: MLConfig | None = None,
+    return_test_predictions: bool = False,
 ) -> dict[str, Any]:
     """Fast evaluation: one stratified split, one CV on training features.
 
-    Feature selection is performed on the training fold only. The held-out
-    test set is never used for selection, scaling, or model fitting.
+    When ``return_test_predictions`` is True, adds
+    ``results["test_predictions"][model_name] = {"y_true": ..., "y_proba": ...}``
+    so callers can plot ROC curves without re-fitting.
     """
     cfg = cfg or MLConfig()
 
     X_train, X_test, y_train, y_test = train_test_split(
-        expression,
-        labels,
+        expression, labels,
         test_size=cfg.test_size,
         stratify=labels,
         random_state=cfg.random_state,
     )
 
-    # --- Feature selection on TRAINING data only ---
     top_genes = _select_top_k(
         X_train, y_train, cfg.top_k_features, cfg.random_state
     )
@@ -149,10 +149,11 @@ def train_and_evaluate(
     logger.info("Selected top %d genes on training fold only", len(top_genes))
 
     results: dict[str, Any] = {"top_genes": top_genes, "models": {}}
+    if return_test_predictions:
+        results["test_predictions"] = {}
+
     cv = StratifiedKFold(
-        n_splits=cfg.n_splits,
-        shuffle=True,
-        random_state=cfg.random_state,
+        n_splits=cfg.n_splits, shuffle=True, random_state=cfg.random_state
     )
 
     for name, model in _make_models(cfg).items():
@@ -179,6 +180,13 @@ def train_and_evaluate(
             "confusion_matrix": confusion_matrix(y_test, y_pred).tolist(),
         }
         results["models"][name] = metrics
+
+        if return_test_predictions and y_proba is not None:
+            results["test_predictions"][name] = {
+                "y_true": y_test.to_numpy(),
+                "y_proba": y_proba,
+            }
+
         logger.info(
             "%s | acc=%.3f  f1=%.3f  auc=%.3f  cv_auc=%.3f±%.3f",
             name,
@@ -190,7 +198,6 @@ def train_and_evaluate(
         )
 
     return results
-
 
 # ---------------------------------------------------------------------------
 # Strict path: nested cross-validation
