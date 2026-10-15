@@ -61,7 +61,7 @@ def generate_dataset(cfg: DataConfig) -> SyntheticDataset:
     per_gene_sd = rng.uniform(0.4, 1.2, size=g)
 
     # ---- Labels ----
-    n_tumor = int(round(n * cfg.tumor_ratio))
+    n_tumor = int(round(n * cfg.tumor_ratio))  # noqa: RUF046
     labels = np.array([1] * n_tumor + [0] * (n - n_tumor))
     rng.shuffle(labels)
 
