@@ -29,6 +29,18 @@ _REAL_GENE_NAMES = [
 
 
 def _make_gene_names(n_genes: int, n_true: int, rng: np.random.Generator) -> list[str]:
+    max_real = len(_REAL_GENE_NAMES)
+    if n_true > max_real:
+        logger.warning(
+            "n_true_biomarkers=%d exceeds the pool of real gene symbols (%d); "
+            "clamping to %d",
+            n_true, max_real, max_real,
+        )
+        n_true = max_real
+    if n_true > n_genes:
+        raise ValueError(
+            f"n_true_biomarkers ({n_true}) cannot exceed n_genes ({n_genes})"
+        )
     real = list(_REAL_GENE_NAMES)
     rng.shuffle(real)
     true_names = real[:n_true]
