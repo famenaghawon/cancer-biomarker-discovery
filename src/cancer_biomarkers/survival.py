@@ -16,8 +16,6 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
-from statsmodels.duration.hazard_regression import PHReg
 
 from .logging_utils import get_logger
 
@@ -60,117 +58,60 @@ def cox_ph(
     expression: pd.DataFrame,
     time: pd.Series,
     event: pd.Series,
-    top_genes: list[str] | None = None,
-    survival_panel: list[str] | None = None,
+    top_genes: list[str],
 ) -> CoxResult:
-    """Fit a Cox PH model on a set of gene expressions.
+    """Fit a Cox PH model via lifelines.
 
-    Parameters
-    ----------
-    top_genes
-        Fallback panel (e.g. ML top-K) when ``survival_panel`` is None.
-    survival_panel
-        Explicit panel to use for the Cox fit. Takes priority over
-        ``top_genes``.
+    Rows with missing time, event, or gene expression are dropped.
+    Covariates are standardized so hazard ratios are per 1 SD of expression.
     """
-    panel = survival_panel if survival_panel is not None else top_genes
-    if not panel:
-        raise ValueError("cox_ph requires either top_genes or survival_panel")
-    # Restrict to genes actually present
-    panel = [g for g in panel if g in expression.columns]
+    from lifelines import CoxPHFitter
+
+    panel = [g for g in top_genes if g in expression.columns]
     if len(panel) < 2:
-        raise ValueError(f"Not enough valid covariates: {panel}")
+        raise ValueError(f"Need at least 2 covariates, got {panel}")
 
     df = pd.concat(
         [expression[panel], time.rename("time"), event.rename("event")],
         axis=1,
-    )
-
-    df = df.dropna(subset=["time", "event"])
+    ).dropna(subset=["time", "event", *panel])
     df = df[df["time"] > 0]
+
     if len(df) < 20:
-        raise RuntimeError(
-            f"Not enough usable survival records ({len(df)}). "
-            "Check the clinical table for time/event columns."
-        )
+        raise RuntimeError(f"Too few usable records ({len(df)})")
     n_events = int(df["event"].sum())
     if n_events < 10:
-        raise RuntimeError(
-            f"Too few events for Cox PH ({n_events}). "
-            "The clinical table may use a different vital-status encoding, "
-            "or the cohort may have no recorded deaths."
-        )
+        raise RuntimeError(f"Too few events ({n_events})")
 
-    raw = df[top_genes].astype(float)
-    # Standardize covariates: Cox PH is scale-sensitive and unstandardized
-    # expression values (order 1 to 1e3) break the numerical Hessian.
-    mean = raw.mean(axis=0)
-    std = raw.std(axis=0).replace(0, 1.0)
-    X_std = (raw - mean) / std
+    # Standardize covariates; drop zero-variance columns.
+    raw = df[panel].astype(float)
+    keep = [c for c in panel if raw[c].var() > 1e-8]
+    if len(keep) < 2:
+        raise RuntimeError(f"Fewer than 2 non-degenerate covariates: {keep}")
+    std = raw[keep].std().replace(0, 1.0)
+    df_std = (raw[keep] - raw[keep].mean()) / std
 
-    kept = _filter_collinear(X_std, panel)
-    dropped = sorted(set(top_genes) - set(kept))
-    if dropped:
-        logger.info(
-            "Cox PH: dropped %d collinear/degenerate covariates: %s",
-            len(dropped), ", ".join(dropped),
-        )
-    if len(kept) < 2:
-        raise RuntimeError(
-            "Too few non-degenerate covariates for Cox PH after filtering "
-            f"(kept {len(kept)} of {len(top_genes)})"
-        )
+    fit_df = pd.concat(
+        [df_std, df[["time", "event"]]], axis=1,
+    ).rename(columns={"time": "T", "event": "E"})
 
-    y = df["time"].astype(float)
-    cens = 1 - df["event"].astype(int)
+    cph = CoxPHFitter()
+    cph.fit(fit_df, duration_col="T", event_col="E")
 
-    fit = None
-    used = list(kept)
-    errors: list[str] = []
-    while len(used) >= 1 and fit is None:
-        X_kept = sm.add_constant(X_std[used])
-        try:
-            model = PHReg(y, X_kept, status=cens, ties="efron")
-            fit = model.fit(method="newton", maxiter=100)
-        except (ValueError, np.linalg.LinAlgError) as exc:
-            errors.append(f"{len(used)} covars: {exc}")
-            used = used[:-1]  # drop the last covariate and retry
-
-    if fit is None:
-        raise RuntimeError(
-            "Cox PH failed for every covariate subset. "
-            f"Errors: {'; '.join(errors)}"
-        )
-    if len(used) < len(kept):
-        logger.warning(
-            "Cox PH converged with a reduced panel: %s (dropped %s)",
-            used, [g for g in kept if g not in used],
-        )
-
-    params = fit.params
-    bse = fit.bse
-    pvalues = fit.pvalues
-    hazard_ratios = np.exp(np.clip(params, -50, 50))
-    ci_low = np.exp(np.clip(params - 1.96 * bse, -50, 50))
-    ci_high = np.exp(np.clip(params + 1.96 * bse, -50, 50))
-
+    summary = cph.summary
     table = pd.DataFrame({
-        "coef": params,
-        "hazard_ratio": hazard_ratios,
-        "hr_ci_low": ci_low,
-        "hr_ci_high": ci_high,
-        "p_value": pvalues,
+        "coef": summary["coef"],
+        "hazard_ratio": summary["exp(coef)"],
+        "hr_ci_low": summary["exp(coef) lower 95%"],
+        "hr_ci_high": summary["exp(coef) upper 95%"],
+        "p_value": summary["p"],
     })
-    table.attrs["interpretation"] = "HR per 1 SD of gene expression"
+    table.attrs["interpretation"] = "HR per 1 SD of standardized gene expression"
 
-    try:
-        concordance = float(fit.concordance)
-    except AttributeError:
-        concordance = float("nan")
-
+    concordance = float(cph.concordance_index_)
     logger.info(
         "Cox PH: %d samples, %d events, %d covariates, concordance=%.3f",
-        len(df), int(df["event"].sum()), len(used), concordance,
+        len(fit_df), n_events, len(keep), concordance,
     )
     return CoxResult(coefficients=table, concordance=concordance)
 
