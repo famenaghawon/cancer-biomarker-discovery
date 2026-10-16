@@ -28,15 +28,24 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Also run nested cross-validation (slower).",
     )
+    p.add_argument(
+        "--batch-correct",
+        action="store_true",
+        help=(
+            "Apply per-batch mean-shift removal before DE. "
+            "Only used when the loaded cohort has a 'batch' column."
+        ),
+    )
     return p.parse_args()
-
 
 def main() -> None:
     args = _parse_args()
     if args.nested:
         os.environ["CB_RUN_NESTED_CV"] = "1"
-    run(data_cfg=DataConfig(source=args.data))
-
+    run(data_cfg=DataConfig(
+        source=args.data,
+        batch_correct=args.batch_correct,
+    ))
 
 if __name__ == "__main__":
     main()

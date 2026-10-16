@@ -111,6 +111,41 @@ log2FC[g] = log2( (mean_tumor[g] + ε) / (mean_normal[g] + ε) )
 with `ε = 1e-9` to avoid division by zero. This is the *correct* definition —
 a difference of means is not a fold change and cannot be interpreted as one.
 
+### Batch-effect correction
+
+When the cohort carries a `batch` column, the pipeline can optionally remove
+per-batch mean shifts before DE:
+
+```
+log2_expr_corrected[i, g] = log2_expr[i, g]
+                            - mean(log2_expr[batch(i), g])
+                            + global_mean[g]
+```
+
+This is a simplified ComBat-style adjustment — it removes location shifts only
+and does not model scale differences or covariate interactions. It is
+sufficient to demonstrate the fix and to compare DE results with and without
+correction, which is the point of this option.
+
+Enable with `--batch-correct` on the CLI, or by setting
+`DataConfig(batch_correct=True)` programmatically. The corrected matrix is
+written alongside the raw one as `expression_full_batch_corrected.parquet`, so
+the two can be compared directly.
+
+The synthetic generator injects a three-level batch effect by default
+(`DataConfig.batch_effect_sd`); the TCGA-BRCA loader currently has no batch
+metadata, so the flag is a no-op on that source. This is documented rather
+than papered over.
+
+**Expected effect on the results.** On the default synthetic cohort, batch
+correction adds roughly one to two extra significant DE biomarkers and can
+shift the best-performing ML model (see `analysis_summary.json`). It does not
+dramatically change the outcome because the injected batch effect is small
+(`batch_effect_sd = 0.25`); raising it would make the difference more visible
+and is a natural sensitivity-analysis extension.
+
+
+
 ### Statistical test
 
 Welch's two-sample t-test (unequal variances), via

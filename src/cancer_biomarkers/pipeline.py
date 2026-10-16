@@ -67,6 +67,22 @@ def run(
 
     # 1) Data
     ds = _load_dataset(data_cfg)
+
+    # 1b) Optional: batch correction
+    if data_cfg.batch_correct and "batch" in ds.clinical.columns:
+        from .batch import correct_batch
+
+        logger.info("Applying batch correction (per-batch mean shift removal)")
+        ds.expression = correct_batch(ds.expression, ds.clinical["batch"])
+        ds.expression.to_parquet(
+            paths.results_dir / "expression_full_batch_corrected.parquet",
+        )
+    elif data_cfg.batch_correct:
+        logger.warning(
+            "batch_correct=True but no 'batch' column in clinical data; "
+            "skipping correction",
+        )
+
     ds.expression.to_parquet(paths.results_dir / "expression_full.parquet")
     ds.clinical.to_csv(paths.results_dir / "clinical_data.csv", index=False)
 
