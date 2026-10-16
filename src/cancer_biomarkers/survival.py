@@ -1,8 +1,9 @@
 """Survival analysis on the loaded cohort.
 
-Cox proportional-hazards fit is provided by ``lifelines.CoxPHFitter``;
-Kaplan–Meier curves are computed via a small product-limit estimator that
-groups deaths by unique time (see ``kaplan_meier`` below).
+Cox proportional-hazards fit is provided by ``lifelines.CoxPHFitter``.
+Kaplan-Meier curves are computed via ``lifelines.KaplanMeierFitter``, which
+implements the standard product-limit estimator and correctly handles tied
+event times.
 
 Covariate hygiene
 -----------------
