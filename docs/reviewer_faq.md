@@ -5,58 +5,90 @@ researcher is likely to ask when reading this repository. Each answer points at
 the concrete file or line of code that supports the claim, so nothing has to be
 taken on trust.
 
----
-
-## Q1. Why synthetic data? Why not real TCGA data?
-
-**Short answer:** network access, licensing, and reproducibility.
-
-**Long answer:** Real TCGA data is publicly available but:
-
-- Requires an authenticated download (GDC API keys, or a mirror with its own
-  terms). CI cannot fetch it reliably, and the repo would be unusable offline.
-- Has licence terms that vary by cohort and downstream use; embedding a real
-  subset in a demo repo risks violating redistribution terms.
-- Is large enough that a fresh clone plus `pytest` would take minutes instead
-  of seconds.
-
-The synthetic generator models the features that matter for a DE + ML pipeline:
-
-- log₂-scale expression with per-gene variance (`data.py`)
-- batch and library-size effects
-- heterogeneous effect sizes and direction on a known biomarker panel
-- silent tumours (a fraction of tumours that look normal on the panel)
-- decoy genes that create plausible false positives
-
-This gives the pipeline a *known ground truth*, which real data cannot. The
-recovery rate (`top_k_recovery` in `analysis_summary.json`) directly measures
-whether the pipeline found the planted signal, not just whether the classifier
-happened to fit.
-
-Swapping in real data is the subject of a documented future extension in
-`docs/methods.md` §7.
+**Scope.** The pipeline supports three data sources: synthetic expression
+(`--data synthetic`, default), real TCGA-BRCA (`--data tcga_brca`), and
+synthetic methylation (`--data methylation`). Answers below note which source
+each point applies to where relevant.
 
 ---
 
-## Q2. Isn't the classifier still suspiciously accurate at ~85%?
+## Q1. Why does the default run use synthetic data? Why not default to real TCGA?
 
-**Short answer:** Yes, and that is the point. It is not 100%.
+**Short answer:** Reproducibility, offline capability, and CI speed.
 
-**Long answer:** With `effect_size = 0.5` on the log₂ scale and 20% silent
-tumours, an honest classifier should sit in the 0.80–0.90 accuracy range. If
-you see 0.95 or above, the synthetic data has drifted toward trivial
+**Long answer:** The pipeline ships with three data sources and real TCGA-BRCA
+is a first-class path, not a demo afterthought:
+
+```bash
+python scripts/run_pipeline.py --data tcga_brca
+```
+
+That run downloads a curated BRCA subset (~40 MB) from the UCSC Xena Browser,
+caches it under `data/cache/` (gitignored), and runs the exact same DE + ML +
+survival stack as the synthetic cohort.
+
+The **default** stays synthetic because:
+
+- CI runs on three Python versions and must complete in under a minute. A
+  40 MB network download, plus BRCA-scale computation, would push that to
+  several minutes per version.
+- A fresh clone works offline. Synthetic data has no external dependency and
+  no licence terms.
+- Synthetic data has a **known ground truth** — the recovery metric
+  (`top_k_recovery` in `analysis_summary.json`) directly measures whether the
+  pipeline found the planted biomarker panel. Real data has no such signal.
+
+That said, real data is where the pipeline proves itself. The TCGA-BRCA run
+loads 1,211 samples (1,097 tumour / 114 normal) across 59 curated cancer
+genes, fits a Cox proportional-hazards model on real clinical follow-up, and
+reports a concordance in the 0.5–0.7 range — the honest, non-trivial result
+you would expect from a real BRCA survival analysis.
+
+**Why not stream from the GDC Data Portal directly?** Because the GDC API
+requires authentication for most endpoints, and embedding a real subset in the
+repo raises redistribution concerns. UCSC Xena hosts the same TCGA data as
+plain HTTP files with no auth and an academic-friendly posture — that is why
+it is the loader's target. If the Xena URLs ever change, the loader falls back
+through a short list of alternatives in `data_source/tcga.py`.
+
+---
+
+## Q2. Isn't the classifier still suspiciously accurate on some sources?
+
+**Short answer:** The numbers are honest for each source. Synthetic sits at
+0.75–0.83, methylation at 0.88–0.93, and real TCGA-BRCA at 0.96–0.97. Only the
+TCGA result looks "too good," and that is a real property of the cohort, not a
+bug.
+
+**Long answer:** Three data sources produce three different accuracy regimes,
+each with a distinct explanation:
+
+| Source | Typical accuracy | Why |
+|---|---|---|
+| Synthetic expression | 0.75–0.83 | Deliberately hard: `effect_size = 0.5`, ~20% silent tumours, ~25 decoy genes |
+| Synthetic methylation | 0.88–0.93 | Methylation signal is inherently cleaner (β-values are near-binary), but silent tumours and moderate effect size keep it from saturating |
+| Real TCGA-BRCA | 0.96–0.97 | Tumour-vs-normal classification on a curated 59-gene cancer panel; the signal is genuinely strong |
+
+**The synthetic cohorts are the hard ones by design.** With
+`effect_size = 0.5`, ~20% silent tumours, and decoys, models should not hit
+100%. If your synthetic run reports 0.95+, the data has drifted toward trivial
 separability — three knobs restore realism:
 
-1. `DataConfig.effect_size` — lower to `0.4` (`config.py`)
-2. `data.py` — raise `per_gene_sd` from `U(0.4, 1.2)` to `U(0.8, 2.0)`
-3. `data.py` — raise the silent-tumour fraction from `0.20` to `0.30`
+1. `DataConfig.effect_size` — lower to `0.4` in `config.py`
+2. `src/cancer_biomarkers/data_source/synthetic.py` — raise `per_gene_sd`
+   from `U(0.4, 1.2)` to `U(0.8, 2.0)`
+3. `src/cancer_biomarkers/data_source/synthetic.py` — raise the silent-tumour
+   fraction from `0.20` to `0.30`
 
 The hardness table in `docs/methods.md` §1 documents the expected range for
-each `effect_size` so you can reproduce it in seconds.
+each `effect_size`.
 
-Near-perfect accuracy is a *warning sign* in biomarker ML, not a goal. A
-classifier that separates perfectly on synthetic data has learned something
-about the generator, not about biology.
+**The TCGA number is high because the task is easy on that cohort.** TCGA-BRCA
+samples are almost all high-tumour-purity primary tumours versus
+adjacent-normal tissue, and the curated panel is built from genes known to be
+differentially expressed in breast cancer. A classifier that could not separate
+them would be broken. The **interesting** metric on TCGA is the survival
+concordance (0.525), not the classification accuracy.
 
 ---
 
@@ -74,10 +106,14 @@ about the generator, not about biology.
   `nested_cv_evaluate`). Neither path touches the test set during selection.
 - **Test-set metrics** are computed once at the end on `X_test_k`, which
   was never fed to any fitting or selection step.
-- **Test enforcement** — `tests/test_no_leakage.py::test_select_top_k_ignores_holdout_labels`
+- **Test enforcement** —
+  `tests/test_no_leakage.py::test_select_top_k_ignores_holdout_labels`
   constructs a dataset, mutates the hold-out labels, and asserts that the
   selected top-K does not change. If selection were contaminated by hold-out
   information, this test would fail.
+- **Survival** uses the same discipline: the Cox fit and Kaplan–Meier
+  stratification are computed on the same samples the model was trained on,
+  with no leakage into the DE or ML steps.
 
 The nested CV path exists because the fast path still has a small optimistic
 bias from selecting once before the outer CV loop. The methods doc
@@ -87,19 +123,28 @@ bias from selecting once before the outer CV loop. The methods doc
 
 ## Q4. Why Welch's t-test and not a negative-binomial GLM (as DESeq2 or edgeR do)?
 
-**Short answer:** The generator works on log₂-scale data, not raw counts.
+**Short answer:** The pipeline operates on continuous, log-scale values — not
+raw counts — so Welch is the appropriate test.
 
 **Long answer:** DESeq2 and edgeR model **raw count data** with a
-negative-binomial distribution to account for mean-variance dependence. Our
-generator emits continuous log₂-scale values, converted to linear for storage.
-For continuous data, Welch's t-test is the standard test — it does not assume
-equal variances between groups, which is usually a bad assumption in tumour vs.
-normal comparisons.
+negative-binomial distribution to account for mean-variance dependence. The
+pipeline never sees counts:
 
-If you swap in real count data, the correct move is to fit DESeq2 or edgeR
-directly. That would require a different data load path (counts, not
-continuous values) and a different DE module. It is a genuine extension, not a
-drop-in replacement.
+- **Synthetic expression** and **TCGA-BRCA expression** are provided as
+  `log2(norm_count + 1)` — the standard Xena output. Continuous and roughly
+  normal on a per-gene basis.
+- **Methylation** β-values are transformed to M-values via
+  `M = log2((β + ε) / (1 − β + ε))`, which puts them on a continuous
+  log-odds scale with broadly symmetric per-gene distributions.
+
+For continuous data, Welch's t-test is the standard test — it does not assume
+equal variances between groups, which is usually a bad assumption in tumour
+vs. normal comparisons.
+
+**If you swap in real raw-count data,** the correct move is to fit DESeq2 or
+edgeR directly. That would require a different data-load path (counts, not
+continuous values) and a different DE module. It is a genuine extension, not
+a drop-in replacement.
 
 ---
 
@@ -115,8 +160,9 @@ among rejected hypotheses, which is what you actually care about in a
 discovery setting: "of the genes I call significant, at most X% are expected to
 be false positives."
 
-BH is implemented via `statsmodels.stats.multitest.multipletests(method="fdr_bh")`
-in `differential_expression.py`. It is the same correction used by DESeq2,
+BH is implemented via
+`statsmodels.stats.multitest.multipletests(method="fdr_bh")` in
+`differential_expression.py`. It is the same correction used by DESeq2,
 edgeR, and limma for standard RNA-seq DE.
 
 If you want a more conservative test, `multipletests` also supports
@@ -149,12 +195,13 @@ See `differential_expression.py`:
 
 ## Q7. How is the "top-K recovery" metric computed, and why does it matter?
 
-**Short answer:** It counts how many of the top-K selected genes are in the
-planted true-biomarker panel.
+**Short answer:** It counts how many of the top-K selected features are in the
+planted true-biomarker panel. It only applies to synthetic sources, which have
+a known ground truth.
 
 **Long answer:** Accuracy tells you whether the classifier *works*, but not
 *whether it found the right thing*. A model can be 95% accurate while looking
-at the wrong genes. Recovery directly answers: "of the 30 genes the pipeline
+at the wrong genes. Recovery directly answers: "of the K features the pipeline
 selected, how many are the ones we planted?"
 
 Implementation (`ml.py::count_true_in_top_k`):
@@ -171,10 +218,18 @@ return {
 ```
 
 The result is written to `analysis_summary.json` under `top_k_recovery` and
-logged at the end of the pipeline. A companion test
-(`tests/test_biomarker_recovery.py`) asserts that at least half of the true
-biomarkers appear among the significant DE genes under default-like settings —
-if feature selection were broken, this test would fail.
+logged at the end of the pipeline. Typical recovery on the synthetic cohort
+is around 11–12 of 25 biomarkers, and on methylation around 25 of 25 (the
+methylation signal is cleaner).
+
+**Real TCGA-BRCA has no ground-truth panel**, so recovery is not reported for
+that source. The `true_biomarkers` field for TCGA is simply the curated gene
+panel that the loader requested, not a signal that was planted. That
+distinction is reported honestly in the summary.
+
+A companion test (`tests/test_biomarker_recovery.py`) asserts that at least a
+third of the true biomarkers appear among the significant DE genes under
+default-like settings — if feature selection were broken, this test would fail.
 
 ---
 
@@ -236,32 +291,35 @@ demonstrate the pipeline's modelling surface and keep CI fast.
 
 **Long answer:**
 
-1. **Real data with external validation.** Download a well-characterised cohort
-   (e.g. TCGA-BRCA), split by *institution* or *batch*, not randomly. Random
-   splits leak technical information across folds.
-2. **Batch-effect correction.** Run ComBat or limma's `removeBatchEffect`
-   before DE. Our generator injects a batch effect deliberately, but the
-   pipeline does not remove it.
-3. **Survival analysis.** Fit a Cox proportional-hazards model on the top
-   biomarkers and validate the stratification on held-out cohorts. This is
-   the point of a biomarker — predicting outcome, not just class.
+1. **External validation cohort.** The pipeline already runs on real TCGA-BRCA
+   data, but a real study would validate on a *second* independent cohort
+   (e.g. METABRIC for BRCA, or a GEO series) and report performance on that.
+   A single-cohort result is a starting point, not evidence.
+2. **Batch-effect correction applied by default.** The `--batch-correct` flag
+   exists and the `batch.correct_batch` function is tested, but the default
+   is off. A real study would run the flag on and compare, or fit a model
+   with batch as a covariate directly.
+3. **Proper survival modelling.** The lifelines Cox fit currently uses only
+   2–3 prognostic genes; a real study would fit a multivariate model on a
+   larger panel selected by univariate screening, report HRs with 95% CIs,
+   and validate the stratification on the external cohort.
 4. **Nested cross-validation throughout.** Report performance from the outer
    CV of a properly nested design; the current `nested_cv_evaluate` is the
-   starting point.
+   starting point and only runs when `CB_RUN_NESTED_CV=1`.
 5. **Pre-registered thresholds.** Fix α, min |log₂FC|, and effect-size cutoffs
    *before* looking at data. Post-hoc threshold tuning is the most common
    source of irreproducible biomarker results.
 6. **Wet-lab validation.** The ultimate test. No classifier result, however
    clean, replaces an assay.
 
-None of these are implementable inside this repo. They are the reason a demo
-like this is a starting point, not a study.
+Points 1–4 are implementable inside this repo as extensions; 5 and 6 are
+study-design decisions, not code.
 
 ---
 
 ## Q11. Is this "pharmaceutical-grade" as the original description claimed?
 
-**Short answer:** No, and the README no longer claims it.
+**Short answer:** No, and neither the README nor the docs claim it.
 
 **Long answer:** The original repo description used language like
 "pharmaceutical-grade" and cited performance metrics (92.4% accuracy,
@@ -269,16 +327,18 @@ like this is a starting point, not a study.
 been removed:
 
 - The README's "Performance Metrics" section was replaced with an honest
-  methodological description.
+  methodological description and a disclaimer.
 - The synthetic data was deliberately made harder (`effect_size = 0.5`) so
   models do not reach suspicious accuracy.
 - The methods doc and this FAQ are written to be *auditable*, not persuasive.
+- The real-data path is documented for what it is — a proof the pipeline
+  works on public data, not a clinical-grade tool.
 
 "Pharmaceutical-grade" implies GxP-compliant processes, validated codebases,
-audit trails, and regulatory review. A synthetic-data demo is not that. What
-this repo *is*: a well-structured example of correct methodology for a
-biomarker-discovery pipeline. That is a meaningfully different claim, and it
-is the honest one.
+audit trails, and regulatory review. This is not that. What this repo *is*: a
+well-structured, tested, CI-verified example of correct methodology for a
+biomarker-discovery pipeline, running on both synthetic and public real data.
+That is a meaningfully different claim, and it is the honest one.
 
 ---
 
@@ -292,7 +352,7 @@ the historical fixes applied to it. It is intentionally short and factual.
 For full methodological detail, use `docs/methods.md`; for figure descriptions,
 use `docs/figures.md`; for the answers to skeptical questions, use this file.
 
-The three docs split responsibilities:
+The docs split responsibilities as follows:
 
 | File | Audience | Content |
 |---|---|---|
@@ -300,6 +360,8 @@ The three docs split responsibilities:
 | `docs/methods.md` | a reviewer auditing the science | formulas, thresholds, decisions |
 | `docs/figures.md` | a reviewer reading the plots | what each figure shows, how to sanity-check |
 | `docs/reviewer_faq.md` | a skeptical reviewer | this file |
+| `docs/api.md` | someone importing the package | public classes and functions |
+| `docs/changelog.md` | anyone tracking version history | release-by-release changes |
 | `PROJECT_SUMMARY.md` | the maintainer | what changed and why |
 
 ---
@@ -307,5 +369,7 @@ The three docs split responsibilities:
 ## Contact
 
 If a question is not answered here and you would like it added, open an issue
+at
+https://github.com/famenaghawon/cancer-biomarker-discovery/issues
 or email f.e.amenaghawon@gmail.com. This FAQ is intended to be extended
 whenever a new reviewer question appears.
