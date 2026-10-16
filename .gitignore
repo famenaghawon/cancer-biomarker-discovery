@@ -34,3 +34,5 @@ results/figures/*.png
 # Real data cache (downloaded, not committed)
 data/cache/
 data/raw/
+# Streamlit
+.streamlit/secrets.toml
