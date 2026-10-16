@@ -48,7 +48,7 @@ _CURATED_PANEL = [
     "CDK6", "FGFR1", "FGFR2", "FGFR3", "KRAS", "BRAF", "ALK", "MET",
     "RET", "NF1", "SMAD4", "APC", "VHL", "BAX", "BCL2", "MTOR",
     "PIK3R1", "FOXA1", "TBX3", "RUNX1", "CBFB", "ARID1A", "ARID1B",
-    "KMT2C", "NCOR1", "SPEN", "CTCFF", "ZNF217", "AURKA", "AURKB",
+    "KMT2C", "NCOR1", "SPEN", "CTCF", "ZNF217", "AURKA", "AURKB",
     "BUB1", "BUB1B", "MAD2L1", "PLK1", "TTK", "NDC80", "ESR1", "PGR",
     "PRLR", "CYP19A1", "HSD17B1", "IGF1R", "INSR", "IRS1", "IRS2",
 ]
@@ -59,8 +59,8 @@ class TCGADataset:
     expression: pd.DataFrame           # samples x genes, log2 scale
     labels: pd.Series                  # 0 = normal-adjacent, 1 = primary tumor
     clinical: pd.DataFrame             # sample-level metadata
-    true_biomarkers: list[str]         # curated panel intersected with genes
-    dataset_name: str = "TCGA-BRCA"
+    gene_panel: list[str]              # curated panel that was loaded
+    has_planted_biomarkers: bool = False   # TCGA has no planted signal
 
 
 def _download(url: str, dest: Path, timeout: int = 60) -> Path:
@@ -220,5 +220,6 @@ def load_tcga_brca(
         expression=expr,
         labels=labels,
         clinical=clinical_summary,
-        true_biomarkers=genes,
+        gene_panel=genes,
+        has_planted_biomarkers=False,
     )

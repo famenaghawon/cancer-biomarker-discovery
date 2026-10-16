@@ -27,10 +27,11 @@ _EPS = 1e-6
 
 @dataclass
 class MethylationDataset:
-    beta: pd.DataFrame           # samples x CpG sites, values in [0, 1]
-    labels: pd.Series            # 0 = normal, 1 = tumor
+    beta: pd.DataFrame
+    labels: pd.Series
     clinical: pd.DataFrame
-    true_biomarkers: list[str]   # CpG IDs that carry a real tumor-vs-normal signal
+    true_biomarkers: list[str]
+    has_planted_biomarkers: bool = True
 
 
 def _build_probe_names(n_probes: int, rng: np.random.Generator) -> list[str]:

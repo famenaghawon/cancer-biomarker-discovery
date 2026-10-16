@@ -24,6 +24,7 @@ def test_pipeline_runs_end_to_end(tmp_path):
     # Summary schema
     assert "models" in summary["ml"]
     assert set(summary["ml"]["models"]) == {"logistic_regression", "random_forest"}
+    # Synthetic source has a planted panel, so recovery must be present.
     assert "top_k_recovery" in summary
     recovery = summary["top_k_recovery"]
     assert recovery["k"] > 0

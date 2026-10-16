@@ -18,7 +18,7 @@ class SyntheticDataset:
     labels: pd.Series
     clinical: pd.DataFrame
     true_biomarkers: list[str]
-
+    has_planted_biomarkers: bool = True
 
 _REAL_GENE_NAMES = [
     "BRCA1", "BRCA2", "TP53", "EGFR", "MYC", "KRAS", "PTEN", "RB1",

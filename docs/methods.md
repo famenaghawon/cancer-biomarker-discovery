@@ -202,7 +202,23 @@ significant[g] = (q_value[g] < α)  AND  (|log2FC[g]| ≥ min_abs_log2fc)
 
 Defaults: `α = 0.05`, `min_abs_log2fc = 0.6`. Both criteria are required — an
 FDR-significant gene with a negligible fold change is not biologically useful.
+Defaults: `α = 0.05`, `min_abs_log2fc = 0.6`. Both criteria are required — an
+FDR-significant gene with a negligible fold change is not biologically useful.
 
+**Note on the log-scale shortcut.** TCGA expression from Xena is already
+`log2(norm_count + 1)`. The DE module computes
+`log2(mean_tumor / mean_normal)` directly on those values, which is the ratio
+of log-space means, **not** the log₂ fold change of linear expression. The two
+are equal in the limit of tight distributions and differ modestly otherwise.
+This is a common shortcut in quick analyses and is accepted here for
+consistency with the synthetic path (which stores log₂ values).
+
+A strict implementation would exponentiate the matrix before DE:
+
+```python
+linear = np.power(2.0, expression)
+log2fc = np.log2((linear[labels == 1].mean() + eps) / (linear[labels == 0].mean() + eps))
+```
 ### Output
 
 A DataFrame sorted by ascending q-value with columns:
@@ -296,6 +312,14 @@ Reported fields:
 | `recovery_rate` | `n_true_in_top_k / len(true_biomarkers)` |
 
 ---
+| `recovery_rate` | `n_true_in_top_k / len(true_biomarkers)` |
+
+**Applies only to sources with a planted signal.** The recovery metric is
+meaningful for `synthetic` and `methylation` because those generators plant a
+known biomarker panel. It is **not reported** for `tcga_brca` because the
+curated gene panel that gets loaded is not a signal — it is simply the list of
+genes requested. The summary JSON omits `top_k_recovery` when the source has
+no planted panel, and the pipeline logs this explicitly.
 
 ## 4. Figures (`plotting.py`)
 

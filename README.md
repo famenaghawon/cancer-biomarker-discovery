@@ -34,7 +34,9 @@ clinical decision.
 3. **Trains classifiers** with feature selection performed **only on training
    data** — no leakage across the train/test boundary.
 4. **Reports** both cross-validated and held-out test metrics, plus a
-   top-K recovery rate against the planted biomarker panel.
+   top-K recovery rate against the planted biomarker panel (recovery is
+   reported for `synthetic` and `methylation` sources, which have a known
+   ground truth; it is omitted for real `tcga_brca` data).
 5. **Fits a Cox proportional-hazards model** (via `lifelines`) and produces
    Kaplan–Meier curves when the cohort has survival data.
 6. **Optionally corrects batch effects** (ComBat-style location-shift removal).
@@ -140,9 +142,8 @@ in the reported performance. Slower; use it for publication-style claims.
 Once a pipeline run has produced results in `results/`, launch the dashboard:
 
 ```bash
-pip install streamlit plotly
-streamlit run dashboard/app.py
-```
+pip install -e ".[dashboard]"
+streamlit run dashboard/app.py```
 
 The dashboard opens at `http://localhost:8501` and shows:
 
@@ -412,6 +413,14 @@ under `config`, so a report can be reproduced exactly from the summary alone.
 | `0.7` | 10–15 | 0.93–0.96 | Clean, well-powered demo |
 | **`0.5`** | **6–10** | **0.83–0.88** | **Default — honest demo** |
 | `0.4` | 2–4 | 0.75–0.82 | Adversarially hard |
+
+**Recovery metric scope.** The `top_k_recovery` field in
+`analysis_summary.json` reports how many of the selected top-K features match
+the planted biomarker panel. It is only meaningful for the `synthetic` and
+`methylation` sources — those generators plant a known panel. For real
+`tcga_brca` data, the field is omitted because the curated gene list that gets
+loaded is not a signal. See
+[`docs/methods.md`](docs/methods.md) for the full explanation.
 
 ### Custom runs
 

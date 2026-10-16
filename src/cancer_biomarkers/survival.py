@@ -1,13 +1,13 @@
 """Survival analysis on the loaded cohort.
 
-Implements a Cox proportional-hazards fit via ``statsmodels`` and a
-Kaplan-Meier curve via a small hand-rolled implementation (no lifelines
-dependency). Both are honest about right-censoring.
+Cox proportional-hazards fit is provided by ``lifelines.CoxPHFitter``;
+Kaplan–Meier curves are computed via a small product-limit estimator that
+groups deaths by unique time (see ``kaplan_meier`` below).
 
 Covariate hygiene
 -----------------
-Cox PH fails when covariates are collinear (singular Hessian). Because our
-top-K feature selection often picks highly co-expressed genes (e.g. several
+Cox PH fails when covariates are collinear or degenerate. Because our top-K
+feature selection often picks highly co-expressed genes (e.g. several
 proliferation markers), we drop near-duplicate covariates before fitting.
 """
 from __future__ import annotations
@@ -122,35 +122,35 @@ def kaplan_meier(
     stratify_by: pd.Series | None = None,
     groups: tuple[str, str] = ("low", "high"),
 ) -> list[KMCurve]:
-    """Compute Kaplan-Meier survival curves, optionally by a binary stratum."""
+    """Compute Kaplan-Meier survival curves via ``lifelines.KaplanMeierFitter``.
+
+    Tied event times are handled by the standard product-limit estimator.
+    """
+    from lifelines import KaplanMeierFitter
+
     df = pd.DataFrame({"time": time, "event": event})
     if stratify_by is not None:
         df["stratum"] = stratify_by
 
-    curves: list[KMCurve] = []
     strata = (
         [(g, df[df["stratum"] == g]) for g in groups]
         if stratify_by is not None
         else [("all", df)]
     )
+    curves: list[KMCurve] = []
     for label, sub in strata:
         sub = sub.dropna(subset=["time", "event"])
-        sub = sub[sub["time"] > 0].sort_values("time")
+        sub = sub[sub["time"] > 0]
         if sub.empty:
             continue
-        times = sub["time"].to_numpy(dtype=float)
-        events = sub["event"].to_numpy(dtype=int)
-        surv = []
-        s = 1.0
-        for t, e in zip(times, events, strict=False):
-            if e == 1:
-                at_risk = int((times >= t).sum())
-                if at_risk > 0:
-                    s *= 1.0 - 1.0 / at_risk
-            surv.append(s)
-        curves.append(KMCurve(times=times, survival=np.array(surv), label=label))
+        kmf = KaplanMeierFitter()
+        kmf.fit(sub["time"], event_observed=sub["event"], label=label)
+        curves.append(KMCurve(
+            times=kmf.survival_function_.index.to_numpy(dtype=float),
+            survival=kmf.survival_function_[label].to_numpy(dtype=float),
+            label=label,
+        ))
     return curves
-
 
 def stratify_by_expression(
     expression: pd.Series, cutoff: str = "median"

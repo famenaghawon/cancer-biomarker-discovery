@@ -1,4 +1,13 @@
 # Changelog
+## 0.3.0 — 2026-10-16
+
+- Real TCGA-BRCA data source with survival fields (Cox PH, Kaplan–Meier).
+- Synthetic methylation source with real 450k CpG IDs and M-value transform.
+- Optional batch correction (`--batch-correct`).
+- Recovery metric gated to sources with a planted panel.
+- Kaplan–Meier now uses `lifelines.KaplanMeierFitter` (handles tied times).
+- Streamlit dashboard and hosted MkDocs documentation site.
+- Survival module docstring corrected; `CTCF` restored in the curated panel.
 
 ## 2026-10-16 — Dashboard and docs site
 

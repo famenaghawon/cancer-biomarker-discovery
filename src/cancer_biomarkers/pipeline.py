@@ -84,14 +84,15 @@ def run(
 
     # 1) Data
     ds = _load_dataset(data_cfg)
+    expression = expression
 
     # 1b) Optional: batch correction
     if data_cfg.batch_correct and "batch" in ds.clinical.columns:
         from .batch import correct_batch
 
         logger.info("Applying batch correction (per-batch mean shift removal)")
-        ds.expression = correct_batch(ds.expression, ds.clinical["batch"])
-        ds.expression.to_parquet(
+        expression = correct_batch(expression, ds.clinical["batch"])
+        expression.to_parquet(
             paths.results_dir / "expression_full_batch_corrected.parquet",
         )
     elif data_cfg.batch_correct:
@@ -100,28 +101,34 @@ def run(
             "skipping correction",
         )
 
-    ds.expression.to_parquet(paths.results_dir / "expression_full.parquet")
+    expression.to_parquet(paths.results_dir / "expression_full.parquet")
     ds.clinical.to_csv(paths.results_dir / "clinical_data.csv", index=False)
 
-    # 2) DE
-    de_df = differential_expression(ds.expression, ds.labels, de_cfg)
+    # 2) DE — use the (possibly corrected) local `expression`
+    de_df = differential_expression(expression, ds.labels, de_cfg)
     de_df.to_csv(paths.results_dir / "de_results.csv", index=False)
     de_df[de_df["significant"]].to_csv(
         paths.results_dir / "significant_biomarkers.csv", index=False)
 
     # 3) ML (fast path) — ask for test probabilities so ROC plotting can reuse them
     ml_results = train_and_evaluate(
-        ds.expression, ds.labels, ml_cfg, return_test_predictions=True,
+        expression, ds.labels, ml_cfg, return_test_predictions=True,
     )
 
     # 3b) Recovery stats for top-k
-    recovery = count_true_in_top_k(ml_results["top_genes"], ds.true_biomarkers)
-
+    if getattr(ds, "has_planted_biomarkers", False):
+        recovery = count_true_in_top_k(ml_results["top_genes"], ds.true_biomarkers)
+    else:
+        recovery = None
+        logger.info(
+            "Recovery metric not applicable: %s has no planted biomarker panel",
+            data_cfg.source,
+        )
     # 3c) Optional: nested CV (opt-in via CB_RUN_NESTED_CV=1)
     nested_results = None
     if _nested_enabled():
         logger.info("CB_RUN_NESTED_CV set — running nested cross-validation")
-        nested_results = nested_cv_evaluate(ds.expression, ds.labels, ml_cfg)
+        nested_results = nested_cv_evaluate(expression, ds.labels, ml_cfg)
 
     # 3d) Survival analysis — only when the cohort has time/event columns
     survival_summary = None
@@ -132,20 +139,20 @@ def run(
         # because top class-discriminating genes rarely predict survival.
         preferred = [
             g for g in _SURVIVAL_PANEL_CANDIDATES
-            if g in ds.expression.columns
+            if g in expression.columns
         ]
         panel = preferred if len(preferred) >= 2 else ml_results["top_genes"][:3]
         top_gene = panel[0]
 
         try:
             cox = cox_ph(
-                ds.expression,
+                expression,
                 ds.clinical["time_days"],
                 ds.clinical["event"],
                 top_genes=panel,
             )
             cox.coefficients.to_csv(paths.results_dir / "cox_coefficients.csv")
-            stratum = stratify_by_expression(ds.expression[top_gene])
+            stratum = stratify_by_expression(expression[top_gene])
             curves = kaplan_meier(
                 ds.clinical["time_days"],
                 ds.clinical["event"],
@@ -174,7 +181,7 @@ def run(
 
     top = ml_results["top_genes"][:25]
     heatmap_top_genes(
-        ds.expression, ds.labels, top, paths.figures_dir / "heatmap.png",
+        expression, ds.labels, top, paths.figures_dir / "heatmap.png",
     )
 
     # ROC curve for the best-performing model on the held-out test set.
@@ -201,7 +208,7 @@ def run(
         "true_biomarkers": sorted(ds.true_biomarkers),
         "true_biomarkers_recovered": sorted(
             set(ds.true_biomarkers) & set(de_df.loc[de_df["significant"], "gene"])),
-        "top_k_recovery": recovery,
+        **( {"top_k_recovery": recovery} if recovery is not None else {} ),
         "ml": {k: v for k, v in ml_results.items() if k != "test_predictions"},
     }
     if nested_results is not None:
@@ -214,11 +221,13 @@ def run(
 
     joblib.dump(ml_results, paths.results_dir / "ml_results.pkl")
 
-    logger.info(
-        "Top-%d recovery: %d/%d true biomarkers | %s",
-        recovery["k"], recovery["n_true_in_top_k"],
-        len(ds.true_biomarkers), ", ".join(recovery["true_hits"]) or "(none)",
-    )
+    if recovery is not None:
+        logger.info(
+            "Top-%d recovery: %d/%d true biomarkers | %s",
+            recovery["k"], recovery["n_true_in_top_k"],
+            len(ds.true_biomarkers), ", ".join(recovery["true_hits"]) or "(none)",
+        )
+
     logger.info("Best model for ROC: %s", best_name)
     logger.info("✅ Pipeline complete. Results in %s", paths.results_dir)
     return summary
