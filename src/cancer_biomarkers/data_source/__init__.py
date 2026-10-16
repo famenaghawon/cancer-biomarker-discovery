@@ -1,4 +1,4 @@
-"""Data sources: synthetic generator and real TCGA loaders."""
+"""Data sources: synthetic expression, TCGA-BRCA, and synthetic methylation."""
 from .synthetic import SyntheticDataset, generate_dataset
 from .tcga import TCGADataset, load_tcga_brca
 

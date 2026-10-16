@@ -42,14 +42,31 @@ def _nested_enabled() -> bool:
 def _load_dataset(cfg: DataConfig):
     """Dispatch to the configured data source.
 
-    Returns an object exposing ``expression``, ``labels``, ``clinical``,
-    and ``true_biomarkers``.
+    Returns an object exposing ``expression``, ``labels``, ``clinical``, and
+    ``true_biomarkers``. Methylation data is transformed to M-values so the
+    downstream DE + ML pipeline sees the same kind of matrix as expression.
     """
     if cfg.source == "synthetic":
         return generate_dataset(cfg)
     if cfg.source == "tcga_brca":
         panel = list(cfg.gene_panel) if cfg.gene_panel else None
         return load_tcga_brca(cfg, gene_panel=panel)
+    if cfg.source == "methylation":
+        from .data_source.synthetic import SyntheticDataset
+        from .multiomics import generate_methylation, to_m_values
+
+        methyl = generate_methylation(cfg)
+        m_values = to_m_values(methyl.beta)
+        logger.info(
+            "Applied M-value transform: %d x %d matrix on log2-odds scale",
+            m_values.shape[0], m_values.shape[1],
+        )
+        return SyntheticDataset(
+            expression=m_values,
+            labels=methyl.labels,
+            clinical=methyl.clinical,
+            true_biomarkers=methyl.true_biomarkers,
+        )
     raise ValueError(f"Unknown data source: {cfg.source!r}")
 
 

@@ -19,7 +19,7 @@ def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
         "--data",
-        choices=["synthetic", "tcga_brca"],
+        choices=["synthetic", "tcga_brca", "methylation"],
         default="synthetic",
         help="Which data source to use (default: synthetic).",
     )

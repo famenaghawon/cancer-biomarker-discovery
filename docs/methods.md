@@ -144,6 +144,40 @@ dramatically change the outcome because the injected batch effect is small
 (`batch_effect_sd = 0.25`); raising it would make the difference more visible
 and is a natural sensitivity-analysis extension.
 
+## Multi-omics: methylation
+
+The pipeline accepts a synthetic methylation cohort as an alternative data
+source (`--data methylation`). Values are β-values in [0, 1], the standard
+output of Illumina 450k arrays:
+
+- Baseline β follows a bimodal Beta(0.5, 9.5) distribution, matching the
+  unmethylated-heavy pattern observed in normal tissue.
+- A subset of `n_true_biomarkers` CpG sites receives a tumor-specific
+  hypermethylation shift drawn from U(0.30, 0.60), clipped to [0, 1].
+- Probe IDs are drawn from a curated list of real 450k probes
+  (`data_source/cpg_panel.py`), so the label columns look like real array
+  output rather than generic `cg00001`-style placeholders.
+
+### M-value transform
+
+β-values cannot be fed directly into the DE module, which assumes unbounded
+log-scale values. We apply the standard M-value transform on load:
+
+```
+M = log2( (β + ε) / (1 - β + ε) )
+```
+
+with ε = 1e-6. This converts β ∈ [0, 1] to an unbounded log-odds scale
+that behaves like log₂ expression and preserves the DE t-test assumptions.
+The transform is the same one used by the `minfi` and `ChAMP` Bioconductor
+packages (Du et al., 2010, BMC Bioinformatics 11:587).
+
+### Reuse
+
+Because the methylation matrix is delivered as a `samples × features` DataFrame
+on a log scale, the DE, ML, recovery, and plotting modules are all reused
+without modification. The only difference in the pipeline is the loader branch
+in `_load_dataset`.
 
 
 ### Statistical test

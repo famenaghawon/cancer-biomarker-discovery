@@ -7,7 +7,7 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class DataConfig:
-    source: str = "synthetic"          # "synthetic" | "tcga_brca"
+    source: str = "synthetic"          # "synthetic" | "tcga_brca" | "methylation"
     batch_correct: bool = False        # apply per-batch mean-shift removal before DE
     n_samples: int = 200
     n_genes: int = 500
