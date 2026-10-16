@@ -36,3 +36,5 @@ data/cache/
 data/raw/
 # Streamlit
 .streamlit/secrets.toml
+# MkDocs build output
+site/
