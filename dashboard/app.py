@@ -135,7 +135,7 @@ else:
     for i, (fname, title, caption) in enumerate(present):
         with cols[i % 2]:
             st.markdown(f"**{title}**")
-            st.image(str(FIGURES / fname), caption=caption, use_column_width=True)
+            st.image(str(FIGURES / fname), caption=caption, width="stretch")
 
 st.divider()
 
@@ -176,13 +176,13 @@ if de_path.exists():
     fig.add_hline(y=-np.log10(0.05), line_dash="dash", line_color="grey")
     fig.add_vline(x=0.6, line_dash="dash", line_color="grey")
     fig.add_vline(x=-0.6, line_dash="dash", line_color="grey")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     # Table with sortable columns
     st.markdown("**Top 50 by q-value**")
     st.dataframe(
         de.sort_values("q_value").head(50),
-        use_container_width=True,
+        width="stretch",
         height=400,
     )
 
@@ -218,7 +218,7 @@ if models:
             "cv_roc_auc_std": round(m.get("cv_roc_auc_std", 0.0), 3),
         })
     metrics_df = pd.DataFrame(rows).set_index("model")
-    st.dataframe(metrics_df, use_container_width=True)
+    st.dataframe(metrics_df, width="stretch")
 
     # Bar chart
     fig = px.bar(
@@ -228,7 +228,7 @@ if models:
         barmode="group",
         title="Model comparison",
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 else:
     st.info("No `ml` block in the summary JSON.")
 
@@ -248,7 +248,7 @@ if survival:
     if cox_path.exists():
         cox = pd.read_csv(cox_path, index_col=0)
         st.markdown("**Cox PH coefficients**")
-        st.dataframe(cox, use_container_width=True)
+        st.dataframe(cox, width="stretch")
 
 # ---------------------------------------------------------------------------
 # Footer
