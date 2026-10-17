@@ -1,0 +1,1847 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="End-to-end computational platform for cancer biomarker discovery">
+      
+      
+      
+        <link rel="canonical" href="https://famenaghawon.github.io/cancer-biomarker-discovery/methods/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../figures/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Methods - Cancer Biomarker Discovery Pipeline</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#methods" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Cancer Biomarker Discovery Pipeline" class="md-header__button md-logo" aria-label="Cancer Biomarker Discovery Pipeline" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Cancer Biomarker Discovery Pipeline
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Methods
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/famenaghawon/cancer-biomarker-discovery" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    famenaghawon/cancer-biomarker-discovery
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Cancer Biomarker Discovery Pipeline" class="md-nav__button md-logo" aria-label="Cancer Biomarker Discovery Pipeline" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Cancer Biomarker Discovery Pipeline
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/famenaghawon/cancer-biomarker-discovery" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    famenaghawon/cancer-biomarker-discovery
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methods
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methods
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-synthetic-data-generation-datapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Synthetic data generation (data.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Synthetic data generation (data.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tumor-effect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tumor effect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reproducibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configurable-hardness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configurable hardness
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-differential-expression-differential_expressionpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Differential expression (differential_expression.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Differential expression (differential_expression.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#log2-fold-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log₂ fold change
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-effect-correction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch-effect correction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-omics-methylation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-omics: methylation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-omics: methylation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#m-value-transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        M-value transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reuse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statistical-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistical test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-testing-correction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple-testing correction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#significance-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Significance call
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-machine-learning-mlpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Machine learning (ml.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Machine learning (ml.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data split
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-selection-the-leakage-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature selection — the leakage question
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classifiers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics-fast-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics (fast path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nested-cross-validation-optional-strict-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nested cross-validation (optional strict path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recovery-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recovery metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-figures-plottingpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Figures (plotting.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-reproducing-a-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Reproducing a run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Tests
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Design principles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../figures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Figures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../batch_correction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Batch Correction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tasks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Classification Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reviewer_faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reviewer FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-synthetic-data-generation-datapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Synthetic data generation (data.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Synthetic data generation (data.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tumor-effect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tumor effect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reproducibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configurable-hardness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configurable hardness
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-differential-expression-differential_expressionpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Differential expression (differential_expression.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Differential expression (differential_expression.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#log2-fold-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log₂ fold change
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-effect-correction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch-effect correction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-omics-methylation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-omics: methylation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-omics: methylation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#m-value-transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        M-value transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reuse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statistical-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistical test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-testing-correction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple-testing correction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#significance-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Significance call
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-machine-learning-mlpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Machine learning (ml.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Machine learning (ml.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data split
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-selection-the-leakage-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature selection — the leakage question
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classifiers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics-fast-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics (fast path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nested-cross-validation-optional-strict-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nested cross-validation (optional strict path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recovery-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recovery metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-figures-plottingpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Figures (plotting.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-reproducing-a-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Reproducing a run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Tests
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Design principles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h1>
+<p>This document describes exactly what the pipeline does — formulas, thresholds,
+and design decisions — so a reviewer can audit the science without reading every
+line of code.</p>
+<blockquote>
+<p><strong>Scope:</strong> All data is synthetic. Results are for methodology demonstration only
+and are not clinically meaningful.</p>
+</blockquote>
+<hr />
+<h2 id="1-synthetic-data-generation-datapy">1. Synthetic data generation (<code>data.py</code>)<a class="headerlink" href="#1-synthetic-data-generation-datapy" title="Permanent link">&para;</a></h2>
+<h3 id="design">Design<a class="headerlink" href="#design" title="Permanent link">&para;</a></h3>
+<p>The generator produces a <code>samples × genes</code> matrix of expression values on a
+<strong>log₂ scale</strong>, then converts back to linear units for storage. This mirrors
+real RNA-seq analysis, where log-transformation stabilises variance before DE
+testing.</p>
+<h3 id="model">Model<a class="headerlink" href="#model" title="Permanent link">&para;</a></h3>
+<p>For gene <em>g</em> and sample <em>i</em>:</p>
+<div class="highlight"><pre><span></span><code>log2_expr[i, g] = baseline[g] + noise[i, g] + lib[i] + batch[i] + tumor_effect[i, g]
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Distribution</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>baseline[g]</code></td>
+<td>N(8, 1.0)</td>
+<td>Typical log₂ expression range for a demo</td>
+</tr>
+<tr>
+<td><code>noise[i, g]</code></td>
+<td>N(0, (noise_sd · per_gene_sd[g])²), <code>per_gene_sd[g] ~ U(0.4, 1.2)</code></td>
+<td>Heterogeneous per-gene variance, as in real tissue</td>
+</tr>
+<tr>
+<td><code>lib[i]</code></td>
+<td>N(0, (0.8 · batch_effect_sd)²)</td>
+<td>Library-size / read-depth shift per sample</td>
+</tr>
+<tr>
+<td><code>batch[i]</code></td>
+<td 0_="0," _batch_effect_sd="+batch_effect_sd" _batch_effect_sd_="−batch_effect_sd,">Categorical</td>
+<td>Three-batch structure, mimics technical artefacts</td>
+</tr>
+<tr>
+<td><code>tumor_effect[i, g]</code></td>
+<td>See below</td>
+<td>The biological signal under study</td>
+</tr>
+</tbody>
+</table>
+<p>Defaults: <code>noise_sd = 1.0</code>, <code>batch_effect_sd = 0.25</code>. Both are exposed in
+<code>DataConfig</code> and drive the corresponding noise magnitudes — no hidden constants.</p>
+<p>A final <strong>global noise floor</strong> of N(0, (0.5 · noise_sd)²) is added to every
+entry, so total residual variance is realistic even when the per-gene sd is
+small.</p>
+<h3 id="tumor-effect">Tumor effect<a class="headerlink" href="#tumor-effect" title="Permanent link">&para;</a></h3>
+<p>Only the <em>true biomarker</em> panel (default: 25 genes, named with real symbols
+such as <code>BRCA1</code>, <code>TP53</code>, <code>EGFR</code>) receives a tumor-specific shift on the log₂
+scale:</p>
+<div class="highlight"><pre><span></span><code>effect[g] ~ N(effect_size, (effect_size / 2)²),  clipped to [0.2, 2.5·effect_size]
+direction[g] ~ Bernoulli(0.25)  →  ± effect[g]
+</code></pre></div>
+<p>The tumor-specific shift is applied <strong>multiplicatively in linear space</strong>, which
+is equivalent to additive on the log₂ scale:</p>
+<div class="highlight"><pre><span></span><code>log2_expr[tumor, g] += direction[g] · effect[g]
+</code></pre></div>
+<p>This matters: a naive difference-of-means in linear space understates the fold
+change for high-expression genes. Applying the effect in log₂ space guarantees
+that the DE log₂FC recovered downstream approximates <code>effect[g]</code>.</p>
+<p>Two realism features:</p>
+<ul>
+<li><strong>Silent tumors</strong> — 20% of tumor samples receive no true-biomarker signal
+  (only a small N(0, 0.15²) perturbation). This means a subset of tumours
+  biologically resemble normal tissue, forcing classifiers to learn a soft
+  boundary rather than a perfectly separating hyperplane.</li>
+<li><strong>Decoy genes</strong> — <code>max(10, n_true_biomarkers)</code> additional genes receive weak
+  label-correlated shifts drawn from N(0, (0.8·effect_size)²). These create
+  false positives that a naive feature selector would pick up.</li>
+</ul>
+<h3 id="reproducibility">Reproducibility<a class="headerlink" href="#reproducibility" title="Permanent link">&para;</a></h3>
+<p>Random seed = <code>DataConfig.random_state</code> (default 42). Same seed ⇒ identical
+dataset. All randomness uses <code>numpy.random.default_rng</code> (PCG64), which is
+bit-for-bit reproducible across platforms and numpy versions.</p>
+<h3 id="configurable-hardness">Configurable hardness<a class="headerlink" href="#configurable-hardness" title="Permanent link">&para;</a></h3>
+<p>The <code>effect_size</code> in <code>DataConfig</code> directly controls how separable the synthetic
+dataset is:</p>
+<table>
+<thead>
+<tr>
+<th><code>effect_size</code></th>
+<th>DE hits (typical)</th>
+<th>ML accuracy (typical)</th>
+<th>Intended use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1.0</code></td>
+<td>20–30</td>
+<td>0.98–1.00</td>
+<td>Sanity check only — trivially separable</td>
+</tr>
+<tr>
+<td><code>0.7</code></td>
+<td>10–15</td>
+<td>0.93–0.96</td>
+<td>Clean, well-powered demo</td>
+</tr>
+<tr>
+<td><code>0.5</code></td>
+<td>6–10 (with <code>min_abs_log2fc=0.6</code>)</td>
+<td>0.83–0.88</td>
+<td><strong>Default — honest demo, classifier must generalise</strong></td>
+</tr>
+<tr>
+<td><code>0.4</code></td>
+<td>2–4</td>
+<td>0.75–0.82</td>
+<td>Adversarially hard</td>
+</tr>
+</tbody>
+</table>
+<p>The default is <code>0.5</code>. This demonstrates the full pipeline (differential
+expression finds real signal; classifiers generalise; cross-validation shows
+non-trivial variance) without the "too good to be true" 100% accuracy that a
+naive synthetic generator produces.</p>
+<hr />
+<h2 id="2-differential-expression-differential_expressionpy">2. Differential expression (<code>differential_expression.py</code>)<a class="headerlink" href="#2-differential-expression-differential_expressionpy" title="Permanent link">&para;</a></h2>
+<h3 id="log2-fold-change">Log₂ fold change<a class="headerlink" href="#log2-fold-change" title="Permanent link">&para;</a></h3>
+<p>Per gene <em>g</em>:</p>
+<div class="highlight"><pre><span></span><code>log2FC[g] = log2( (mean_tumor[g] + ε) / (mean_normal[g] + ε) )
+</code></pre></div>
+<p>with <code>ε = 1e-9</code> to avoid division by zero. This is the <em>correct</em> definition —
+a difference of means is not a fold change and cannot be interpreted as one.</p>
+<h3 id="batch-effect-correction">Batch-effect correction<a class="headerlink" href="#batch-effect-correction" title="Permanent link">&para;</a></h3>
+<p>When the cohort carries a <code>batch</code> column, the pipeline can optionally remove
+per-batch mean shifts before DE:</p>
+<div class="highlight"><pre><span></span><code>log2_expr_corrected[i, g] = log2_expr[i, g]
+                            - mean(log2_expr[batch(i), g])
+                            + global_mean[g]
+</code></pre></div>
+<p>This is a simplified ComBat-style adjustment — it removes location shifts only
+and does not model scale differences or covariate interactions. It is
+sufficient to demonstrate the fix and to compare DE results with and without
+correction, which is the point of this option.</p>
+<p>Enable with <code>--batch-correct</code> on the CLI, or by setting
+<code>DataConfig(batch_correct=True)</code> programmatically. The corrected matrix is
+written alongside the raw one as <code>expression_full_batch_corrected.parquet</code>, so
+the two can be compared directly.</p>
+<p>The synthetic generator injects a three-level batch effect by default
+(<code>DataConfig.batch_effect_sd</code>); the TCGA-BRCA loader currently has no batch
+metadata, so the flag is a no-op on that source. This is documented rather
+than papered over.</p>
+<p><strong>Expected effect on the results.</strong> On the default synthetic cohort, batch
+correction adds roughly one to two extra significant DE biomarkers and can
+shift the best-performing ML model (see <code>analysis_summary.json</code>). It does not
+dramatically change the outcome because the injected batch effect is small
+(<code>batch_effect_sd = 0.25</code>); raising it would make the difference more visible
+and is a natural sensitivity-analysis extension.</p>
+<h2 id="multi-omics-methylation">Multi-omics: methylation<a class="headerlink" href="#multi-omics-methylation" title="Permanent link">&para;</a></h2>
+<p>The pipeline accepts a synthetic methylation cohort as an alternative data
+source (<code>--data methylation</code>). Values are β-values in [0, 1], the standard
+output of Illumina 450k arrays:</p>
+<ul>
+<li>Baseline β follows a bimodal Beta(0.5, 9.5) distribution, matching the
+  unmethylated-heavy pattern observed in normal tissue.</li>
+<li>A subset of <code>n_true_biomarkers</code> CpG sites receives a tumor-specific
+  hypermethylation shift drawn from U(0.30, 0.60), clipped to [0, 1].</li>
+<li>Probe IDs are drawn from a curated list of real 450k probes
+  (<code>data_source/cpg_panel.py</code>), so the label columns look like real array
+  output rather than generic <code>cg00001</code>-style placeholders.</li>
+</ul>
+<h3 id="m-value-transform">M-value transform<a class="headerlink" href="#m-value-transform" title="Permanent link">&para;</a></h3>
+<p>β-values cannot be fed directly into the DE module, which assumes unbounded
+log-scale values. We apply the standard M-value transform on load:</p>
+<div class="highlight"><pre><span></span><code>M = log2( (β + ε) / (1 - β + ε) )
+</code></pre></div>
+<p>with ε = 1e-6. This converts β ∈ [0, 1] to an unbounded log-odds scale
+that behaves like log₂ expression and preserves the DE t-test assumptions.
+The transform is the same one used by the <code>minfi</code> and <code>ChAMP</code> Bioconductor
+packages (Du et al., 2010, BMC Bioinformatics 11:587).</p>
+<h3 id="reuse">Reuse<a class="headerlink" href="#reuse" title="Permanent link">&para;</a></h3>
+<p>Because the methylation matrix is delivered as a <code>samples × features</code> DataFrame
+on a log scale, the DE, ML, recovery, and plotting modules are all reused
+without modification. The only difference in the pipeline is the loader branch
+in <code>_load_dataset</code>.</p>
+<h3 id="statistical-test">Statistical test<a class="headerlink" href="#statistical-test" title="Permanent link">&para;</a></h3>
+<p>Welch's two-sample t-test (unequal variances), via
+<code>scipy.stats.ttest_ind(equal_var=False)</code>. Welch's is the default for RNA-seq DE
+because assuming equal variance between tumour and normal samples is rarely
+justified.</p>
+<h3 id="multiple-testing-correction">Multiple-testing correction<a class="headerlink" href="#multiple-testing-correction" title="Permanent link">&para;</a></h3>
+<p>Benjamini–Hochberg FDR (<code>statsmodels.stats.multitest.multipletests(method="fdr_bh")</code>).
+Controls the expected proportion of false discoveries among the genes called
+significant. Without this step, testing 500 genes at α=0.05 would yield ~25
+false positives by chance alone.</p>
+<h3 id="significance-call">Significance call<a class="headerlink" href="#significance-call" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>significant[g] = (q_value[g] &lt; α)  AND  (|log2FC[g]| ≥ min_abs_log2fc)
+</code></pre></div>
+<p>Defaults: <code>α = 0.05</code>, <code>min_abs_log2fc = 0.6</code>. Both criteria are required — an
+FDR-significant gene with a negligible fold change is not biologically useful.
+Defaults: <code>α = 0.05</code>, <code>min_abs_log2fc = 0.6</code>. Both criteria are required — an
+FDR-significant gene with a negligible fold change is not biologically useful.</p>
+<p><strong>Note on the log-scale shortcut.</strong> TCGA expression from Xena is already
+<code>log2(norm_count + 1)</code>. The DE module computes
+<code>log2(mean_tumor / mean_normal)</code> directly on those values, which is the ratio
+of log-space means, <strong>not</strong> the log₂ fold change of linear expression. The two
+are equal in the limit of tight distributions and differ modestly otherwise.
+This is a common shortcut in quick analyses and is accepted here for
+consistency with the synthetic path (which stores log₂ values).</p>
+<p>A strict implementation would exponentiate the matrix before DE:</p>
+<div class="highlight"><pre><span></span><code><span class="n">linear</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
+<span class="n">log2fc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">((</span><span class="n">linear</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">linear</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">eps</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h3>
+<p>A DataFrame sorted by ascending q-value with columns:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gene</code></td>
+<td>Gene symbol</td>
+</tr>
+<tr>
+<td><code>tumor_mean</code></td>
+<td>Mean expression in tumour samples (linear scale)</td>
+</tr>
+<tr>
+<td><code>normal_mean</code></td>
+<td>Mean expression in normal samples (linear scale)</td>
+</tr>
+<tr>
+<td><code>log2fc</code></td>
+<td>log₂ fold change, tumour vs. normal</td>
+</tr>
+<tr>
+<td><code>t_stat</code></td>
+<td>Welch t-statistic</td>
+</tr>
+<tr>
+<td><code>p_value</code></td>
+<td>Raw two-sided p-value</td>
+</tr>
+<tr>
+<td><code>q_value</code></td>
+<td>BH-FDR adjusted p-value</td>
+</tr>
+<tr>
+<td><code>significant</code></td>
+<td>Boolean: passes both q and</td>
+</tr>
+<tr>
+<td><code>direction</code></td>
+<td><code>"up"</code> if log₂FC &gt; 0, else <code>"down"</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-machine-learning-mlpy">3. Machine learning (<code>ml.py</code>)<a class="headerlink" href="#3-machine-learning-mlpy" title="Permanent link">&para;</a></h2>
+<h3 id="data-split">Data split<a class="headerlink" href="#data-split" title="Permanent link">&para;</a></h3>
+<p>Stratified 80/20 train/test split. Stratification preserves the class ratio
+(tumour vs. normal) in both subsets — important when classes are imbalanced.</p>
+<h3 id="feature-selection-the-leakage-question">Feature selection — the leakage question<a class="headerlink" href="#feature-selection-the-leakage-question" title="Permanent link">&para;</a></h3>
+<p>The most common methodological error in biomarker ML is selecting features on
+the full dataset before splitting. This leaks test-set information into
+training and inflates accuracy.</p>
+<p>Our approach:</p>
+<ol>
+<li>Split first.</li>
+<li>On the <strong>training fold only</strong>, compute Welch's t-statistic per gene.</li>
+<li>Take the top-K (default 30) by absolute t-statistic.</li>
+<li>Add a small jitter N(0, (0.05 · mean|t|)²) so selection is not identical
+   across runs.</li>
+<li>Fit the classifier on those K training features.</li>
+<li>Apply to the held-out test set.</li>
+</ol>
+<p>The test set never influences feature selection.</p>
+<h3 id="classifiers">Classifiers<a class="headerlink" href="#classifiers" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Configuration</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logistic regression</td>
+<td><code>C=0.1</code>, L2 penalty, StandardScaler</td>
+<td>Regularisation avoids overfitting on 30 correlated genes</td>
+</tr>
+<tr>
+<td>Random forest</td>
+<td><code>n_estimators=200, max_depth=5, min_samples_leaf=5</code></td>
+<td>Shallow trees for interpretability; enforces softer decision boundary</td>
+</tr>
+</tbody>
+</table>
+<p>Hyperparameters are fixed by design so results are reproducible across runs.
+A small grid search would be the natural extension; it is not done here so that
+CI and the smoke test stay under one second per model.</p>
+<h3 id="metrics-fast-path">Metrics (fast path)<a class="headerlink" href="#metrics-fast-path" title="Permanent link">&para;</a></h3>
+<p><code>train_and_evaluate</code> reports, for each classifier:</p>
+<ul>
+<li><strong>Held-out test set</strong>: accuracy, precision, recall, F1, ROC-AUC, confusion matrix.</li>
+<li><strong>5-fold stratified cross-validation</strong> on the training set: mean and standard
+  deviation of ROC-AUC.</li>
+</ul>
+<p>The CV std matters: near-zero std suggests a model has memorised trivial
+separability. Non-zero std (typically 0.01–0.05 on our synthetic data) is a
+sign of an honestly hard problem.</p>
+<h3 id="nested-cross-validation-optional-strict-path">Nested cross-validation (optional strict path)<a class="headerlink" href="#nested-cross-validation-optional-strict-path" title="Permanent link">&para;</a></h3>
+<p><code>nested_cv_evaluate</code> runs an outer <code>StratifiedKFold</code> for performance and
+<strong>re-selects features inside each training fold</strong>. This eliminates the residual
+optimism of the fast path, where the test split is held out but feature
+selection happens once, before CV.</p>
+<p>Use nested CV when reporting performance for publication-style claims. The
+smoke path stays on <code>train_and_evaluate</code> for speed.</p>
+<h3 id="recovery-metrics">Recovery metrics<a class="headerlink" href="#recovery-metrics" title="Permanent link">&para;</a></h3>
+<p><code>count_true_in_top_k</code> reports how many of the selected top-K genes are
+ground-truth biomarkers. This is more informative than raw accuracy: a model
+can be right for the wrong reasons, but the recovery rate directly tests
+whether feature selection finds the planted signal.</p>
+<p>Reported fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>k</code></td>
+<td>Number of top genes selected</td>
+</tr>
+<tr>
+<td><code>n_true_in_top_k</code></td>
+<td>Count that match <code>true_biomarkers</code></td>
+</tr>
+<tr>
+<td><code>true_hits</code></td>
+<td>Names of matched biomarkers</td>
+</tr>
+<tr>
+<td><code>recovery_rate</code></td>
+<td><code>n_true_in_top_k / len(true_biomarkers)</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>| <code>recovery_rate</code> | <code>n_true_in_top_k / len(true_biomarkers)</code> |</p>
+<p><strong>Applies only to sources with a planted signal.</strong> The recovery metric is
+meaningful for <code>synthetic</code> and <code>methylation</code> because those generators plant a
+known biomarker panel. It is <strong>not reported</strong> for <code>tcga_brca</code> because the
+curated gene panel that gets loaded is not a signal — it is simply the list of
+genes requested. The summary JSON omits <code>top_k_recovery</code> when the source has
+no planted panel, and the pipeline logs this explicitly.</p>
+<h2 id="4-figures-plottingpy">4. Figures (<code>plotting.py</code>)<a class="headerlink" href="#4-figures-plottingpy" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><code>figures/volcano.png</code></strong> — log₂FC vs. −log₁₀(q). Grey points are
+  non-significant, red are significant upregulated, blue are significant
+  downregulated. Threshold lines match <code>DEConfig.min_abs_log2fc</code> and
+  <code>DEConfig.alpha</code> exactly, so the plot's visual criterion equals the table's
+  statistical criterion.</li>
+<li><strong><code>figures/heatmap.png</code></strong> — top-25 biomarkers, log₂-transformed and
+  z-scored per gene so patterns are comparable across genes. Samples ordered by
+  class.</li>
+<li><strong><code>figures/roc_curve.png</code></strong> — ROC curve for logistic regression on the
+  held-out test set, annotated with AUC.</li>
+</ul>
+<hr />
+<h2 id="5-reproducing-a-run">5. Reproducing a run<a class="headerlink" href="#5-reproducing-a-run" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>scripts/run_pipeline.py
+</code></pre></div>
+<p>Outputs (to <code>results/</code>):</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>expression_full.parquet</code></td>
+<td>Full samples × genes matrix</td>
+</tr>
+<tr>
+<td><code>clinical_data.csv</code></td>
+<td>Sample metadata (label, age, stage, batch)</td>
+</tr>
+<tr>
+<td><code>de_results.csv</code></td>
+<td>Full DE table sorted by q-value</td>
+</tr>
+<tr>
+<td><code>significant_biomarkers.csv</code></td>
+<td>Filtered to significant genes only</td>
+</tr>
+<tr>
+<td><code>analysis_summary.json</code></td>
+<td>Config + DE counts + recovered true biomarkers + ML metrics</td>
+</tr>
+<tr>
+<td><code>ml_results.pkl</code></td>
+<td>Pickled ML result dict (top genes + per-model metrics)</td>
+</tr>
+<tr>
+<td><code>figures/volcano.png</code></td>
+<td>Thresholds aligned to <code>DEConfig</code></td>
+</tr>
+<tr>
+<td><code>figures/heatmap.png</code></td>
+<td>z-scored, log₂-transformed</td>
+</tr>
+<tr>
+<td><code>figures/roc_curve.png</code></td>
+<td>ROC curve for logistic regression</td>
+</tr>
+</tbody>
+</table>
+<p>The JSON <code>analysis_summary.json</code> contains:</p>
+<ul>
+<li><code>config</code> — full dataclasses as dicts (reproducibility)</li>
+<li><code>n_significant_biomarkers</code> — integer count from DE</li>
+<li><code>true_biomarkers</code> — list of planted ground-truth gene names</li>
+<li><code>true_biomarkers_recovered</code> — intersection of planted and significant</li>
+<li><code>top_k_recovery</code> — recovery stats for the ML top-K list</li>
+<li><code>ml</code> — per-model metrics (<code>train_and_evaluate</code> output)</li>
+</ul>
+<hr />
+<h2 id="6-tests">6. Tests<a class="headerlink" href="#6-tests" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>What it validates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_differential_expression.py</code></td>
+<td>A known log₂FC signal is detected and ranked first</td>
+</tr>
+<tr>
+<td><code>test_no_leakage.py</code></td>
+<td>Feature selection does not depend on hold-out labels; deterministic under fixed seed</td>
+</tr>
+<tr>
+<td><code>test_biomarker_recovery.py</code></td>
+<td>Planted biomarkers are recovered at a reasonable rate under default-like settings</td>
+</tr>
+<tr>
+<td><code>test_pipeline_smoke.py</code></td>
+<td>End-to-end run completes and writes all expected outputs</td>
+</tr>
+</tbody>
+</table>
+<p>Run all tests with:</p>
+<div class="highlight"><pre><span></span><code>pytest<span class="w"> </span>-q
+</code></pre></div>
+<p>CI executes the same suite on Python 3.10, 3.11, and 3.12.</p>
+<hr />
+<h2 id="7-limitations">7. Limitations<a class="headerlink" href="#7-limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Synthetic data.</strong> Real cancer genomics has copy-number effects, methylation
+  crosstalk, spatial heterogeneity, and population structure that this
+  generator does not model.</li>
+<li><strong>Single dataset.</strong> No external validation cohort.</li>
+<li><strong>No survival analysis.</strong> The <code>stage</code> field is populated for tumours but
+  unused beyond metadata. A Cox proportional-hazards or Kaplan–Meier extension
+  is the natural next step.</li>
+<li><strong>No hyperparameter search.</strong> Model hyperparameters are fixed by design so
+  results are reproducible; a real study would nest a grid search inside the
+  CV loop.</li>
+<li><strong>Binary classification only.</strong> Multi-class tumour subtype prediction is not
+  implemented; the <code>stage</code> column could support it but is not used.</li>
+<li><strong>No batch-effect correction.</strong> The generator introduces a batch effect, but
+  the pipeline does not attempt to remove it (e.g. ComBat or limma
+  <code>removeBatchEffect</code>). This is deliberate — the goal is to show that the
+  classifier is robust to a plausible confound, not to demonstrate batch
+  correction.</li>
+</ul>
+<hr />
+<h2 id="8-design-principles">8. Design principles<a class="headerlink" href="#8-design-principles" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>No leakage.</strong> Every place a model could see the test set is audited:
+   feature selection, hyperparameter selection, and figure generation all use
+   only training-fold data.</li>
+<li><strong>Honest defaults.</strong> The synthetic data is tuned so classifiers do not reach
+   100% accuracy. A pipeline that only works because the data is trivially
+   separable is worse than no pipeline.</li>
+<li><strong>Configurable, not hard-coded.</strong> Every threshold (<code>alpha</code>,
+   <code>min_abs_log2fc</code>, <code>effect_size</code>, <code>noise_sd</code>, <code>batch_effect_sd</code>) lives in a
+   dataclass and is serialised into the output JSON.</li>
+<li><strong>Reproducibility.</strong> All randomness flows through
+   <code>numpy.random.default_rng(seed)</code>. Same config ⇒ same outputs.</li>
+<li><strong>Test the claims.</strong> Every methodological claim in this document has a test
+   that would fail if the claim were violated (leakage, recovery, DE detection).</li>
+</ol>
+<hr />
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Benjamini, Y., &amp; Hochberg, Y. (1995). <em>Controlling the false discovery rate:
+  a practical and powerful approach to multiple testing.</em> Journal of the Royal
+  Statistical Society: Series B, 57(1), 289–300.</li>
+<li>Welch, B. L. (1947). <em>The generalization of "Student's" problem when several
+  different population variances are involved.</em> Biometrika, 34(1–2), 28–35.</li>
+<li>Ambroise, C., &amp; McLachlan, G. J. (2002). <em>Selection bias in gene extraction
+  on the basis of microarray gene-expression data.</em> PNAS, 99(10), 6562–6566.</li>
+<li>Varma, S., &amp; Simon, R. (2006). <em>Bias in error estimation when using
+  cross-validation for model selection.</em> BMC Bioinformatics, 7(1), 91.</li>
+<li>Cawley, G. C., &amp; Talbot, N. L. C. (2010). <em>On over-fitting in model
+  selection and subsequent selection bias in performance evaluation.</em> Journal
+  of Machine Learning Research, 11, 2079–2107.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
