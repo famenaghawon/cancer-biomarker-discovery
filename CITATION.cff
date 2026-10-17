@@ -3,7 +3,7 @@ message: "If you use this software in research or teaching, please cite it as be
 type: software
 title: "Cancer Biomarker Discovery Pipeline"
 version: 0.3.0
-doi: "10.5281/zenodo.PLACEHOLDER"
+doi: "10.5281/zenodo.23433739"
 authors:
   - family-names: Famenaghawon
     given-names: Freedom
