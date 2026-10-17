@@ -33,6 +33,7 @@ nav:
   - Home: index.md
   - Methods: methods.md
   - Figures: figures.md
+  - Batch Correction: batch_correction.md 
   - Reviewer FAQ: reviewer_faq.md
   - API Reference: api.md
   - Changelog: changelog.md
