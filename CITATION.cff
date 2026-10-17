@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software in research or teaching, please cite it as below."
+type: software
+title: "Cancer Biomarker Discovery Pipeline"
+version: 0.3.0
+doi: "10.5281/zenodo.PLACEHOLDER"
+authors:
+  - family-names: Famenaghawon
+    given-names: Freedom
+    email: f.e.amenaghawon@gmail.com
+    orcid: "https://orcid.org/0009-0003-1457-809X"
+repository-code: "https://github.com/famenaghawon/cancer-biomarker-discovery"
+url: "https://famenaghawon.github.io/cancer-biomarker-discovery/"
+license: MIT
+abstract: |
+  End-to-end pipeline for cancer biomarker discovery on synthetic and
+  real TCGA-BRCA data. Rigorous DE (log2FC + Welch t-test + BH-FDR),
+  leakage-safe ML with nested CV, Cox survival analysis via lifelines,
+  full ComBat batch correction with covariate preservation, and
+  multi-omics methylation support.
+keywords:
+  - bioinformatics
+  - cancer-genomics
+  - biomarker-discovery
+  - differential-expression
+  - machine-learning
+  - reproducibility
+  - tcga
+  - methylomics
